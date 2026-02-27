@@ -1,0 +1,49 @@
+{
+  // ========== JAVA / SPRING BOOT ==========
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.18.8-hotspot",
+      "default": true
+    }
+  ],
+  "java.jdt.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.18.8-hotspot",
+  "spring-boot.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.18.8-hotspot",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.maven.enabled": true,
+  "java.autobuild.enabled": true,
+  // ========== FLUTTER / DART ==========
+  "dart.lineLength": 120,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.rulers": [
+      120
+    ],
+    "editor.selectionHighlight": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  // ========== GENERAL ==========
+  "editor.formatOnSave": true,
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  // ========== TERMINAL ==========
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  // ========== SEARCH / FILES EXCLUDE ==========
+  "search.exclude": {
+    "**/build": true,
+    "**/target": true,
+    "**/.gradle": true,
+    "**/.dart_tool": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/.idea": true
+  }
+}

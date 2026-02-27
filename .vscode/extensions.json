@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    // Flutter & Dart
+    "Dart-Code.dart-code",
+    "Dart-Code.flutter",
+    // Java & Spring Boot
+    "vscjava.vscode-java-pack",
+    "vmware.vscode-spring-boot",
+    "vscjava.vscode-spring-boot-dashboard",
+    "vscjava.vscode-spring-initializr",
+    // REST API Testing
+    "humao.rest-client",
+    // MySQL
+    "cweijan.vscode-mysql-client2",
+    // Utilities
+    "esbenp.prettier-vscode",
+    "PKief.material-icon-theme",
+    "formulahendry.auto-rename-tag"
+  ]
+}
