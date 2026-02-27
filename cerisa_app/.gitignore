@@ -6,7 +6,6 @@
 /.vscode/
 
 # Recursos pesados (opcional, si no quieres subir imágenes grandes)
-/Logo main.jpg
 /Recursos logo/
 # Miscellaneous
 *.class
