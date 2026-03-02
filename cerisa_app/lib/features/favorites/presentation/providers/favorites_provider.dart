@@ -24,6 +24,9 @@ class FavoritesProvider extends ChangeNotifier {
   /// Mensaje de error de la última operación fallida.
   String? _error;
 
+  /// Indica si ya se cargaron los favoritos al menos una vez.
+  bool _isLoaded = false;
+
   /// Crea una instancia de [FavoritesProvider] con el [ApiService] proporcionado.
   FavoritesProvider(this._api);
 
@@ -45,7 +48,11 @@ class FavoritesProvider extends ChangeNotifier {
   ///
   /// Llama a GET /api/favorites con autenticación JWT.
   /// Actualiza [favorites], [_favoriteIds], [isLoading] y [error].
-  Future<void> loadFavorites() async {
+  /// Si [force] es false y ya se cargaron antes, no hace nada.
+  Future<void> loadFavorites({bool force = false}) async {
+    if (_isLoading) return;
+    if (_isLoaded && !force && _error == null) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -57,6 +64,7 @@ class FavoritesProvider extends ChangeNotifier {
       for (final p in _favorites) {
         _favoriteIds.add(p.id);
       }
+      _isLoaded = true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     } finally {
@@ -69,16 +77,19 @@ class FavoritesProvider extends ChangeNotifier {
   ///
   /// Llama a POST /api/favorites/{productId}.
   /// Actualiza el estado local inmediatamente para UX responsiva.
+  /// NO recarga la lista completa — solo actualiza estado local.
   /// Retorna `true` si fue exitoso.
   Future<bool> addFavorite(int productId) async {
+    // Actualizar estado local inmediatamente (optimistic update)
+    _favoriteIds.add(productId);
+    notifyListeners();
+
     try {
       await _api.post('/favorites/$productId', {}, auth: true);
-      _favoriteIds.add(productId);
-      notifyListeners();
-      // Recargar la lista completa para tener el modelo completo
-      await loadFavorites();
       return true;
     } catch (e) {
+      // Revertir en caso de error
+      _favoriteIds.remove(productId);
       _error = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       return false;

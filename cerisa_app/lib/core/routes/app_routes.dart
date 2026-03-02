@@ -14,6 +14,9 @@ import 'package:cerisa_app/features/admin_stock/presentation/screens/admin_stock
 import 'package:cerisa_app/features/admin_orders/presentation/screens/admin_orders_screen.dart';
 import 'package:cerisa_app/features/admin_reports/presentation/screens/admin_reports_screen.dart';
 import 'package:cerisa_app/features/admin_users/presentation/screens/admin_users_screen.dart';
+import 'package:cerisa_app/features/admin_sales/presentation/screens/register_sale_screen.dart';
+import 'package:cerisa_app/features/admin_products/presentation/screens/edit_product_screen.dart';
+import 'package:cerisa_app/features/catalog/presentation/providers/catalog_provider.dart';
 import 'package:cerisa_app/features/search/presentation/screens/search_screen.dart';
 import 'package:cerisa_app/features/search/presentation/screens/search_results_screen.dart';
 import 'package:cerisa_app/features/favorites/presentation/screens/favorites_screen.dart';
@@ -93,6 +96,12 @@ class AppRoutes {
   /// Ruta de la pantalla de gestión de usuarios.
   static const String adminUsers = '/admin/users';
 
+  /// Ruta de la pantalla de registro de venta directa.
+  static const String registerSale = '/admin/register-sale';
+
+  /// Ruta de la pantalla de edición de producto.
+  static const String editProduct = '/admin/products/edit';
+
   /// Generador de rutas utilizado por [MaterialApp.onGenerateRoute].
   ///
   /// Recibe [RouteSettings] con el nombre de la ruta y argumentos opcionales,
@@ -145,6 +154,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const AdminReportsScreen());
       case adminUsers:
         return MaterialPageRoute(builder: (_) => const AdminUsersScreen());
+      case registerSale:
+        return MaterialPageRoute(builder: (_) => const RegisterSaleScreen());
+      case editProduct:
+        final editProductArg = settings.arguments as ProductModel?;
+        return MaterialPageRoute(builder: (_) => EditProductScreen(product: editProductArg));
       default:
         // Ruta no registrada: mostrar pantalla de error
         return MaterialPageRoute(

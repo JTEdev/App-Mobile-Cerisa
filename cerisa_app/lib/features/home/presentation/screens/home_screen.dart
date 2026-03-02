@@ -9,6 +9,8 @@ import 'package:cerisa_app/features/search/presentation/screens/search_screen.da
 import 'package:cerisa_app/features/favorites/presentation/screens/favorites_screen.dart';
 import 'package:cerisa_app/features/orders/presentation/screens/my_orders_screen.dart';
 import 'package:cerisa_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:cerisa_app/features/admin_dashboard/presentation/screens/admin_dashboard_screen.dart';
+import 'package:cerisa_app/features/admin_orders/presentation/screens/admin_orders_screen.dart';
 
 /// Pantalla principal de la aplicación con barra de navegación inferior.
 ///
@@ -31,66 +33,58 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Índice de la pestaña actualmente seleccionada (0 = Inicio).
   int _currentIndex = 0;
 
-  /// Pantallas para usuarios con rol CLIENTE.
-  static const List<Widget> _clientScreens = [
-    CatalogScreen(), // Pestaña 0: Inicio / Catálogo rediseñado
-    SearchScreen(), // Pestaña 1: Búsqueda de productos
-    CartScreen(), // Pestaña 2: Carrito de compras
-    FavoritesScreen(), // Pestaña 3: Productos favoritos
-    ProfileScreen(), // Pestaña 4: Perfil y configuración
-  ];
+  /// Construye la pantalla correspondiente al índice para CLIENTE.
+  Widget _buildClientScreen(int index) {
+    switch (index) {
+      case 0:
+        return const CatalogScreen();
+      case 1:
+        return const SearchScreen();
+      case 2:
+        return const CartScreen();
+      case 3:
+        return const FavoritesScreen();
+      case 4:
+        return const ProfileScreen();
+      default:
+        return const CatalogScreen();
+    }
+  }
 
-  /// Pantallas para usuarios con rol ADMIN.
-  static const List<Widget> _adminScreens = [
-    CatalogScreen(), // Pestaña 0: Catálogo de productos
-    CartScreen(), // Pestaña 1: Carrito de compras
-    MyOrdersScreen(), // Pestaña 2: Gestión de pedidos
-    ProfileScreen(), // Pestaña 3: Perfil y administración
-  ];
+  /// Construye la pantalla correspondiente al índice para ADMIN.
+  Widget _buildAdminScreen(int index) {
+    switch (index) {
+      case 0:
+        return const AdminDashboardScreen();
+      case 1:
+        return const CatalogScreen();
+      case 2:
+        return const AdminOrdersScreen();
+      case 3:
+        return const ProfileScreen();
+      default:
+        return const AdminDashboardScreen();
+    }
+  }
 
-  /// Destinos de navegación para ADMIN.
-  static const List<NavigationDestination> _adminDestinations = [
-    NavigationDestination(
-      icon: Icon(Icons.storefront_outlined),
-      selectedIcon: Icon(Icons.storefront),
-      label: 'Catálogo',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.shopping_cart_outlined),
-      selectedIcon: Icon(Icons.shopping_cart),
-      label: 'Carrito',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.receipt_long_outlined),
-      selectedIcon: Icon(Icons.receipt_long),
-      label: 'Pedidos',
-    ),
-    NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Perfil'),
-  ];
+  // (Admin nav bar is now custom, built inline below)
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final isAdmin = auth.isAdmin;
-    final screens = isAdmin ? _adminScreens : _clientScreens;
+    // Solo reconstruir cuando isAdmin cambie, no en cada notificación de AuthProvider
+    final isAdmin = context.select<AuthProvider, bool>((a) => a.isAdmin);
+    final maxIndex = isAdmin ? 3 : 4;
 
     // Asegurar que el índice sea válido al cambiar de rol
-    if (_currentIndex >= screens.length) {
+    if (_currentIndex > maxIndex) {
       _currentIndex = 0;
     }
 
     return Scaffold(
-      // IndexedStack mantiene todas las pantallas en memoria
-      // para preservar su estado al cambiar de pestaña
-      body: IndexedStack(index: _currentIndex, children: screens),
+      // Solo construir UNA pantalla a la vez (no IndexedStack con todas)
+      body: isAdmin ? _buildAdminScreen(_currentIndex) : _buildClientScreen(_currentIndex),
       // Barra de navegación inferior
-      bottomNavigationBar: isAdmin
-          ? NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) => setState(() => _currentIndex = index),
-              destinations: _adminDestinations,
-            )
-          : _buildClientNavBar(),
+      bottomNavigationBar: isAdmin ? _buildAdminNavBar() : _buildClientNavBar(),
     );
   }
 
@@ -125,11 +119,39 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Barra de navegación personalizada para admin (INICIO, MERCADO, PEDIDOS, PERFIL).
+  Widget _buildAdminNavBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, -4)),
+        ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.grid_view_outlined, Icons.grid_view_rounded, 'INICIO'),
+              _buildNavItem(1, Icons.storefront_outlined, Icons.storefront, 'MERCADO'),
+              _buildNavItem(2, Icons.receipt_long_outlined, Icons.receipt_long, 'PEDIDOS'),
+              _buildNavItem(3, Icons.person_outline, Icons.person_rounded, 'PERFIL'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Construye un ítem individual de la barra de navegación.
   Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label) {
     final isSelected = _currentIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => setState(() {
+        _currentIndex = index;
+      }),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -165,7 +187,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCartNavItem(int index, int itemCount) {
     final isSelected = _currentIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => setState(() {
+        _currentIndex = index;
+      }),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

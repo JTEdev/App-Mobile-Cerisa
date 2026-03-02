@@ -57,7 +57,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           builder: (context, provider, _) {
             if (provider.isLoading) return const AppLoadingIndicator();
             if (provider.error != null) {
-              return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadProducts());
+              return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadProducts(force: true));
             }
 
             final allProducts = provider.products;
@@ -66,7 +66,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
             return RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: () => provider.loadProducts(),
+              onRefresh: () => provider.loadProducts(force: true),
               child: CustomScrollView(
                 slivers: [
                   // ── Barra superior ──

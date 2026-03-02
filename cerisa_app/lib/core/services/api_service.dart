@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cerisa_app/core/constants/api_constants.dart';
@@ -11,6 +12,9 @@ import 'package:cerisa_app/core/services/storage_service.dart';
 class ApiService {
   /// Servicio de almacenamiento local para obtener el token JWT.
   final StorageService _storage;
+
+  /// Tiempo máximo de espera para cualquier solicitud HTTP.
+  static const _timeout = Duration(seconds: 15);
 
   /// Crea una instancia de [ApiService] con el [StorageService] proporcionado.
   ApiService(this._storage);
@@ -34,7 +38,9 @@ class ApiService {
   /// [path] es la ruta relativa al [ApiConstants.baseUrl].
   /// Si [auth] es `true`, incluye el token JWT en las cabeceras.
   Future<Map<String, dynamic>> get(String path, {bool auth = false}) async {
-    final response = await http.get(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth));
+    final response = await http
+        .get(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth))
+        .timeout(_timeout);
     return _handleResponse(response);
   }
 
@@ -43,7 +49,9 @@ class ApiService {
   /// Útil para endpoints que devuelven arreglos JSON (ej: lista de productos).
   /// Lanza una excepción si el código de estado no es exitoso (2xx).
   Future<List<dynamic>> getList(String path, {bool auth = false}) async {
-    final response = await http.get(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth));
+    final response = await http
+        .get(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth))
+        .timeout(_timeout);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -55,11 +63,13 @@ class ApiService {
   /// El cuerpo se serializa a JSON automáticamente.
   /// Devuelve la respuesta decodificada como [Map].
   Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body, {bool auth = false}) async {
-    final response = await http.post(
-      Uri.parse('${ApiConstants.baseUrl}$path'),
-      headers: _headers(auth: auth),
-      body: jsonEncode(body),
-    );
+    final response = await http
+        .post(
+          Uri.parse('${ApiConstants.baseUrl}$path'),
+          headers: _headers(auth: auth),
+          body: jsonEncode(body),
+        )
+        .timeout(_timeout);
     return _handleResponse(response);
   }
 
@@ -68,11 +78,13 @@ class ApiService {
   /// Se usa para actualizar recursos existentes en el backend.
   /// Devuelve la respuesta decodificada como [Map].
   Future<Map<String, dynamic>> put(String path, Map<String, dynamic> body, {bool auth = false}) async {
-    final response = await http.put(
-      Uri.parse('${ApiConstants.baseUrl}$path'),
-      headers: _headers(auth: auth),
-      body: jsonEncode(body),
-    );
+    final response = await http
+        .put(
+          Uri.parse('${ApiConstants.baseUrl}$path'),
+          headers: _headers(auth: auth),
+          body: jsonEncode(body),
+        )
+        .timeout(_timeout);
     return _handleResponse(response);
   }
 
@@ -81,7 +93,9 @@ class ApiService {
   /// Por defecto requiere autenticación ([auth] = true).
   /// Lanza una excepción si el código de estado indica error (≥ 300).
   Future<void> delete(String path, {bool auth = true}) async {
-    final response = await http.delete(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth));
+    final response = await http
+        .delete(Uri.parse('${ApiConstants.baseUrl}$path'), headers: _headers(auth: auth))
+        .timeout(_timeout);
     if (response.statusCode >= 300) throw _parseError(response);
   }
 

@@ -78,7 +78,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
           // Estados de carga, error y lista vacía
           if (provider.isLoading) return const AppLoadingIndicator();
           if (provider.error != null) {
-            return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadAllOrders());
+            return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadAllOrders(force: true));
           }
           if (provider.orders.isEmpty) {
             return const AppEmptyWidget(message: 'No hay pedidos', icon: Icons.receipt_long_outlined);
@@ -86,7 +86,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
           // Lista de pedidos con pull-to-refresh
           return RefreshIndicator(
-            onRefresh: () => provider.loadAllOrders(),
+            onRefresh: () => provider.loadAllOrders(force: true),
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: provider.orders.length,

@@ -74,6 +74,9 @@ class CatalogProvider extends ChangeNotifier {
   /// Mensaje de error de la última carga, o `null` si no hay error.
   String? _error;
 
+  /// Indica si ya se cargaron los productos al menos una vez.
+  bool _isLoaded = false;
+
   /// Lista de productos disponibles (solo lectura).
   List<ProductModel> get products => _products;
 
@@ -87,7 +90,11 @@ class CatalogProvider extends ChangeNotifier {
   ///
   /// Actualiza [_products] con los resultados y notifica a los listeners.
   /// En caso de error, almacena el mensaje en [_error].
-  Future<void> loadProducts() async {
+  /// Si [force] es false y ya se cargaron antes, no hace nada.
+  Future<void> loadProducts({bool force = false}) async {
+    if (_isLoading) return;
+    if (_isLoaded && !force && _error == null) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -96,6 +103,7 @@ class CatalogProvider extends ChangeNotifier {
       final list = await _api.getList('/products');
       // Transformar cada JSON en un ProductModel
       _products = list.map((j) => ProductModel.fromJson(j)).toList();
+      _isLoaded = true;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
     }

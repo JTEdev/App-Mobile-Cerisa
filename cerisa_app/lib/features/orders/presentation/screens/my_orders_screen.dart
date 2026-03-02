@@ -113,7 +113,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 builder: (context, provider, _) {
                   if (provider.isLoading) return const AppLoadingIndicator();
                   if (provider.error != null) {
-                    return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadMyOrders());
+                    return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadMyOrders(force: true));
                   }
                   if (provider.orders.isEmpty) {
                     return const AppEmptyWidget(message: 'No orders yet', icon: Icons.receipt_long_outlined);
@@ -131,7 +131,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   }).toList();
 
                   return RefreshIndicator(
-                    onRefresh: () => provider.loadMyOrders(),
+                    onRefresh: () => provider.loadMyOrders(force: true),
                     color: AppColors.accent,
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),

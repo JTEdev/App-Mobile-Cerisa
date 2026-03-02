@@ -51,7 +51,9 @@ class CartScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.home);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
             },
           ),
           const Text(
@@ -142,7 +144,11 @@ class CartScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             GestureDetector(
-              onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.home),
+              onTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 decoration: BoxDecoration(

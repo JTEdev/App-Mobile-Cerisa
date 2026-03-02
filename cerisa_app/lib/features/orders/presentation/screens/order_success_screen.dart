@@ -347,8 +347,13 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> with SingleTick
         // Botón principal: Seguimiento de Pedido
         GestureDetector(
           onTap: () {
-            Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (route) => false);
-            Navigator.pushNamed(context, AppRoutes.orders);
+            // Capturar el navigator antes de destruir el contexto
+            final nav = Navigator.of(context);
+            nav.pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+            // Esperar un frame para que HomeScreen termine de construirse
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              nav.pushNamed(AppRoutes.orders);
+            });
           },
           child: Container(
             width: double.infinity,

@@ -62,7 +62,9 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.home);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
             },
           ),
           const Expanded(

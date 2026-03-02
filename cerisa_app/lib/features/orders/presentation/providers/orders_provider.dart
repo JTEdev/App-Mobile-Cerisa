@@ -138,7 +138,9 @@ class OrdersProvider extends ChangeNotifier {
   /// Carga los pedidos del usuario autenticado actualmente.
   ///
   /// Llama a `GET /orders/my` con autenticación JWT.
-  Future<void> loadMyOrders() async {
+  Future<void> loadMyOrders({bool force = false}) async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -157,7 +159,9 @@ class OrdersProvider extends ChangeNotifier {
   /// Carga todos los pedidos del sistema (solo administradores).
   ///
   /// Llama a `GET /orders` con autenticación JWT.
-  Future<void> loadAllOrders() async {
+  Future<void> loadAllOrders({bool force = false}) async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -184,7 +188,7 @@ class OrdersProvider extends ChangeNotifier {
       // Buscar el pedido actualizado y recargar la lista
       final index = _orders.indexWhere((o) => o.id == orderId);
       if (index >= 0) {
-        await loadAllOrders();
+        await loadAllOrders(force: true);
       }
       return true;
     } catch (e) {

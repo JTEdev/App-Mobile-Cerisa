@@ -102,7 +102,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             child: IconButton(
               icon: const Icon(Icons.filter_list_rounded, color: AppColors.textPrimary, size: 22),
               onPressed: () {
-                context.read<FavoritesProvider>().loadFavorites();
+                context.read<FavoritesProvider>().loadFavorites(force: true);
               },
             ),
           ),
@@ -183,7 +183,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () => provider.loadFavorites(),
+                onTap: () => provider.loadFavorites(force: true),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(14)),
