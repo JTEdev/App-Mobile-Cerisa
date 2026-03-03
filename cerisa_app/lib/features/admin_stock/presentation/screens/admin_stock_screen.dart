@@ -58,16 +58,13 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((p) {
         final sku = _generateSku(p).toLowerCase();
-        return p.nombre.toLowerCase().contains(_searchQuery) ||
-            sku.contains(_searchQuery);
+        return p.nombre.toLowerCase().contains(_searchQuery) || sku.contains(_searchQuery);
       }).toList();
     }
 
     // Filtro activo
     if (_activeFilter == 'BAJO') {
-      filtered = filtered
-          .where((p) => p.stock > 0 && p.stock <= _lowStockThreshold)
-          .toList();
+      filtered = filtered.where((p) => p.stock > 0 && p.stock <= _lowStockThreshold).toList();
     } else if (_activeFilter == 'AGOTADO') {
       filtered = filtered.where((p) => p.stock == 0).toList();
     }
@@ -93,19 +90,13 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
               return const AppLoadingIndicator();
             }
             if (provider.error != null && provider.products.isEmpty) {
-              return AppErrorWidget(
-                message: provider.error!,
-                onRetry: () => provider.loadProducts(),
-              );
+              return AppErrorWidget(message: provider.error!, onRetry: () => provider.loadProducts());
             }
 
             final allProducts = provider.products;
             final filtered = _filterProducts(allProducts);
-            final totalStock =
-                allProducts.fold<int>(0, (sum, p) => sum + p.stock);
-            final lowStockCount = allProducts
-                .where((p) => p.stock <= _lowStockThreshold)
-                .length;
+            final totalStock = allProducts.fold<int>(0, (sum, p) => sum + p.stock);
+            final lowStockCount = allProducts.where((p) => p.stock <= _lowStockThreshold).length;
 
             return RefreshIndicator(
               color: const Color(0xFFE8734A),
@@ -114,26 +105,20 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader()),
                   SliverToBoxAdapter(child: _buildSearchBar()),
-                  SliverToBoxAdapter(
-                    child: _buildMetricCards(totalStock, lowStockCount),
-                  ),
+                  SliverToBoxAdapter(child: _buildMetricCards(totalStock, lowStockCount)),
                   SliverToBoxAdapter(child: _buildSectionHeader()),
-                  if (_showFilters)
-                    SliverToBoxAdapter(child: _buildFilterChips()),
+                  if (_showFilters) SliverToBoxAdapter(child: _buildFilterChips()),
                   if (filtered.isEmpty)
                     const SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(
-                        child: AppEmptyWidget(message: 'No hay productos'),
-                      ),
+                      child: Center(child: AppEmptyWidget(message: 'No hay productos')),
                     )
                   else
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
-                          (context, index) =>
-                              _buildProductCard(filtered[index], provider),
+                          (context, index) => _buildProductCard(filtered[index], provider),
                           childCount: filtered.length,
                         ),
                       ),
@@ -167,11 +152,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                 color: AppColors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: AppColors.primary,
-                size: 18,
-              ),
+              child: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary, size: 18),
             ),
           ),
           const SizedBox(width: 10),
@@ -182,20 +163,12 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
               color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            child: const Icon(Icons.inventory_2_outlined, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 12),
           const Text(
             'Inventario',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-            ),
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
           ),
           const Spacer(),
           Container(
@@ -204,14 +177,9 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
             decoration: BoxDecoration(
               color: AppColors.surface,
               shape: BoxShape.circle,
-              border:
-                  Border.all(color: AppColors.divider.withValues(alpha: 0.4)),
+              border: Border.all(color: AppColors.divider.withValues(alpha: 0.4)),
             ),
-            child: const Icon(
-              Icons.notifications_outlined,
-              color: AppColors.textPrimary,
-              size: 20,
-            ),
+            child: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 20),
           ),
         ],
       ),
@@ -237,20 +205,10 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
           style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: 'Buscar por nombre o SKU...',
-            hintStyle: TextStyle(
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
-            prefixIcon: Icon(
-              Icons.search,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
-              size: 20,
-            ),
+            hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5), fontSize: 14),
+            prefixIcon: Icon(Icons.search, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 20),
             suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: () => _searchCtrl.clear(),
-                  )
+                ? IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => _searchCtrl.clear())
                 : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -276,9 +234,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppColors.divider.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: AppColors.divider.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,9 +270,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFE8734A).withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: const Color(0xFFE8734A).withValues(alpha: 0.35)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,11 +298,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(
-                        Icons.warning_amber_rounded,
-                        color: Color(0xFFE8734A),
-                        size: 22,
-                      ),
+                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFE8734A), size: 22),
                     ],
                   ),
                 ],
@@ -371,22 +321,14 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
         children: [
           const Text(
             'Productos en Existencia',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const Spacer(),
           GestureDetector(
             onTap: () => setState(() => _showFilters = !_showFilters),
             child: Text(
               _showFilters ? 'Ocultar Filtros' : 'Ver Filtros',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFE8734A),
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFFE8734A)),
             ),
           ),
         ],
@@ -418,14 +360,10 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFFE8734A).withValues(alpha: 0.12)
-              : AppColors.surface,
+          color: isActive ? const Color(0xFFE8734A).withValues(alpha: 0.12) : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive
-                ? const Color(0xFFE8734A)
-                : AppColors.divider.withValues(alpha: 0.4),
+            color: isActive ? const Color(0xFFE8734A) : AppColors.divider.withValues(alpha: 0.4),
             width: isActive ? 1.5 : 1,
           ),
         ),
@@ -434,8 +372,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color:
-                isActive ? const Color(0xFFE8734A) : AppColors.textSecondary,
+            color: isActive ? const Color(0xFFE8734A) : AppColors.textSecondary,
           ),
         ),
       ),
@@ -446,8 +383,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
   // PRODUCT CARD
   // ─────────────────────────────────────────────────────────────
 
-  Widget _buildProductCard(
-      ProductModel product, AdminProductsProvider provider) {
+  Widget _buildProductCard(ProductModel product, AdminProductsProvider provider) {
     final isLow = product.stock > 0 && product.stock <= _lowStockThreshold;
     final isOut = product.stock == 0;
     final sku = _generateSku(product);
@@ -462,8 +398,8 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
           color: isOut
               ? AppColors.error.withValues(alpha: 0.4)
               : isLow
-                  ? const Color(0xFFE8734A).withValues(alpha: 0.35)
-                  : AppColors.divider.withValues(alpha: 0.25),
+              ? const Color(0xFFE8734A).withValues(alpha: 0.35)
+              : AppColors.divider.withValues(alpha: 0.25),
         ),
       ),
       child: Row(
@@ -480,11 +416,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                   product.nombre,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -499,20 +431,12 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                 if (isOut)
                   const Text(
                     'Sin existencias',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.error,
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.error),
                   )
                 else if (isLow)
                   Text(
                     'Quedan ${product.stock} unidades',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFE8734A),
-                    ),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFFE8734A)),
                   )
                 else
                   Text(
@@ -559,12 +483,9 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
               top: 4,
               left: 4,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: product.stock == 0
-                      ? AppColors.error
-                      : const Color(0xFFE8734A),
+                  color: product.stock == 0 ? AppColors.error : const Color(0xFFE8734A),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -586,11 +507,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
   Widget _imgPlaceholder() {
     return Container(
       color: AppColors.inputFill,
-      child: Icon(
-        Icons.image_outlined,
-        color: AppColors.textSecondary.withValues(alpha: 0.3),
-        size: 28,
-      ),
+      child: Icon(Icons.image_outlined, color: AppColors.textSecondary.withValues(alpha: 0.3), size: 28),
     );
   }
 
@@ -598,8 +515,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
   // STOCK CONTROLS (+/-)
   // ─────────────────────────────────────────────────────────────
 
-  Widget _buildStockControls(
-      ProductModel product, AdminProductsProvider provider) {
+  Widget _buildStockControls(ProductModel product, AdminProductsProvider provider) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -607,20 +523,14 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
           icon: Icons.remove,
           color: AppColors.primary,
           bgColor: AppColors.primary.withValues(alpha: 0.1),
-          onTap: product.stock > 0
-              ? () => _updateStock(product, product.stock - 1, provider)
-              : null,
+          onTap: product.stock > 0 ? () => _updateStock(product, product.stock - 1, provider) : null,
         ),
         Container(
           width: 44,
           alignment: Alignment.center,
           child: Text(
             '${product.stock}',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
         ),
         _stockControlButton(
@@ -650,21 +560,13 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
           color: disabled ? bgColor.withValues(alpha: 0.3) : bgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: disabled ? color.withValues(alpha: 0.4) : color,
-        ),
+        child: Icon(icon, size: 18, color: disabled ? color.withValues(alpha: 0.4) : color),
       ),
     );
   }
 
   /// Actualiza el stock del producto de forma optimista (sin recargar toda la lista).
-  Future<void> _updateStock(
-    ProductModel product,
-    int newStock,
-    AdminProductsProvider provider,
-  ) async {
+  Future<void> _updateStock(ProductModel product, int newStock, AdminProductsProvider provider) async {
     if (newStock < 0) return;
     await provider.updateStockOnly(product.id, newStock);
   }
@@ -698,12 +600,10 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
             return Container(
-              padding: EdgeInsets.fromLTRB(
-                24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(ctx).viewInsets.bottom + 24),
               decoration: const BoxDecoration(
                 color: AppColors.surface,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -714,51 +614,38 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                     child: Container(
                       width: 40,
                       height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.divider,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
                   const SizedBox(height: 20),
                   const Text(
                     'Agregar Existencias',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 20),
                   // Selector de producto
                   DropdownButtonFormField<ProductModel>(
                     value: selected,
-                    onChanged: (val) =>
-                        setModalState(() => selected = val),
+                    onChanged: (val) => setModalState(() => selected = val),
                     items: products
-                        .map((p) => DropdownMenuItem(
-                              value: p,
-                              child: Text(
-                                p.nombre,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ))
+                        .map(
+                          (p) => DropdownMenuItem(
+                            value: p,
+                            child: Text(
+                              p.nombre,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        )
                         .toList(),
                     decoration: InputDecoration(
                       labelText: 'Seleccionar producto',
-                      labelStyle: TextStyle(
-                        color: AppColors.textSecondary
-                            .withValues(alpha: 0.6),
-                      ),
+                      labelStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.6)),
                       filled: true,
                       fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     isExpanded: true,
                   ),
@@ -769,18 +656,11 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Cantidad a agregar',
-                      labelStyle: TextStyle(
-                        color: AppColors.textSecondary
-                            .withValues(alpha: 0.6),
-                      ),
+                      labelStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.6)),
                       filled: true,
                       fillColor: AppColors.inputFill,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -794,27 +674,15 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
                         final qty = int.tryParse(qtyCtrl.text) ?? 0;
                         if (qty <= 0) return;
                         Navigator.pop(ctx);
-                        await _updateStock(
-                          selected!,
-                          selected!.stock + qty,
-                          provider,
-                        );
+                        await _updateStock(selected!, selected!.stock + qty, provider);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE8734A),
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text(
-                        'Confirmar',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: const Text('Confirmar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],

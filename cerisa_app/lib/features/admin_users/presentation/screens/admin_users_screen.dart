@@ -28,23 +28,11 @@ _ClientTier _tierFor(UserModel user) {
 _TierInfo _tierInfoFor(_ClientTier tier) {
   switch (tier) {
     case _ClientTier.vip:
-      return const _TierInfo(
-        'VIP',
-        Color(0xFFE8734A),
-        Colors.white,
-      );
+      return const _TierInfo('VIP', Color(0xFFE8734A), Colors.white);
     case _ClientTier.frecuente:
-      return _TierInfo(
-        'FRECUENTE',
-        Colors.grey.shade300,
-        Colors.grey.shade800,
-      );
+      return _TierInfo('FRECUENTE', Colors.grey.shade300, Colors.grey.shade800);
     case _ClientTier.nuevo:
-      return _TierInfo(
-        'NUEVO',
-        const Color(0xFFD5F5E3),
-        const Color(0xFF27AE60),
-      );
+      return _TierInfo('NUEVO', const Color(0xFFD5F5E3), const Color(0xFF27AE60));
   }
 }
 
@@ -56,13 +44,7 @@ int _purchasesFor(UserModel u) {
 }
 
 String _locationFor(UserModel u) {
-  const locations = [
-    'Lima, PE',
-    'Cusco, PE',
-    'Arequipa, PE',
-    'Trujillo, PE',
-    'Piura, PE',
-  ];
+  const locations = ['Lima, PE', 'Cusco, PE', 'Arequipa, PE', 'Trujillo, PE', 'Piura, PE'];
   return locations[u.id % locations.length];
 }
 
@@ -114,9 +96,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     // Solo clientes
     var list = all.where((u) => u.rol == 'CLIENTE').toList();
     if (_query.isNotEmpty) {
-      list = list
-          .where((u) => u.nombre.toLowerCase().contains(_query))
-          .toList();
+      list = list.where((u) => u.nombre.toLowerCase().contains(_query)).toList();
     }
     // Alfabético
     list.sort((a, b) => a.nombre.compareTo(b.nombre));
@@ -137,28 +117,22 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               child: Consumer<AdminUsersProvider>(
                 builder: (context, provider, _) {
                   if (provider.isLoading && provider.users.isEmpty) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFE8734A),
-                      ),
-                    );
+                    return const Center(child: CircularProgressIndicator(color: Color(0xFFE8734A)));
                   }
                   if (provider.error != null && provider.users.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 48, color: AppColors.error),
+                          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                           const SizedBox(height: 12),
-                          Text(provider.error!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.error)),
-                          const SizedBox(height: 12),
-                          TextButton(
-                            onPressed: () => provider.loadUsers(),
-                            child: const Text('Reintentar'),
+                          Text(
+                            provider.error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: AppColors.error),
                           ),
+                          const SizedBox(height: 12),
+                          TextButton(onPressed: () => provider.loadUsers(), child: const Text('Reintentar')),
                         ],
                       ),
                     );
@@ -170,10 +144,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     return const Center(
                       child: Text(
                         'No hay clientes registrados',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 15,
-                        ),
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
                       ),
                     );
                   }
@@ -212,35 +183,20 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 Navigator.of(context).pop();
               }
             },
-            child: const Icon(
-              Icons.arrow_back,
-              color: AppColors.textPrimary,
-              size: 24,
-            ),
+            child: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 24),
           ),
           const SizedBox(width: 14),
           const Text(
             'Mis Clientes',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
           ),
           const Spacer(),
           // Botón agregar cliente
           Container(
             width: 42,
             height: 42,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8734A).withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person_add_outlined,
-              color: Color(0xFFE8734A),
-              size: 22,
-            ),
+            decoration: BoxDecoration(color: const Color(0xFFE8734A).withValues(alpha: 0.12), shape: BoxShape.circle),
+            child: const Icon(Icons.person_add_outlined, color: Color(0xFFE8734A), size: 22),
           ),
         ],
       ),
@@ -266,20 +222,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: 'Buscar cliente por nombre...',
-            hintStyle: TextStyle(
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
-              fontSize: 14,
-            ),
-            prefixIcon: Icon(
-              Icons.search,
-              color: AppColors.textSecondary.withValues(alpha: 0.5),
-              size: 20,
-            ),
+            hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5), fontSize: 14),
+            prefixIcon: Icon(Icons.search, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 20),
             suffixIcon: _query.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: () => _searchCtrl.clear(),
-                  )
+                ? IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => _searchCtrl.clear())
                 : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -319,11 +265,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 backgroundColor: avatarColor.withValues(alpha: 0.15),
                 child: Text(
                   _initials(user.nombre),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: avatarColor,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: avatarColor),
                 ),
               ),
               const SizedBox(width: 14),
@@ -349,12 +291,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                         const SizedBox(width: 8),
                         // Badge tier
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: info.bg,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: info.bg, borderRadius: BorderRadius.circular(8)),
                           child: Text(
                             info.label,
                             style: TextStyle(
@@ -370,18 +308,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        Icon(Icons.location_on_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary
-                                .withValues(alpha: 0.6)),
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           '$location • $purchases compra${purchases > 1 ? 's' : ''}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary
-                                .withValues(alpha: 0.7),
-                          ),
+                          style: TextStyle(fontSize: 13, color: AppColors.textSecondary.withValues(alpha: 0.7)),
                         ),
                       ],
                     ),
@@ -394,14 +329,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   // Placeholder: en el futuro abriría tel:
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                        user.telefono != null
-                            ? 'Llamar a ${user.telefono}'
-                            : 'Sin teléfono registrado',
-                      ),
+                      content: Text(user.telefono != null ? 'Llamar a ${user.telefono}' : 'Sin teléfono registrado'),
                       behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   );
                 },
@@ -412,11 +342,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     color: const Color(0xFF27AE60).withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.phone,
-                    color: Color(0xFF27AE60),
-                    size: 22,
-                  ),
+                  child: const Icon(Icons.phone, color: Color(0xFF27AE60), size: 22),
                 ),
               ),
             ],
@@ -432,21 +358,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 backgroundColor: const Color(0xFFE8734A),
                 foregroundColor: Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'VER DETALLE',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
-                    ),
-                  ),
+                  Text('VER DETALLE', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1)),
                   SizedBox(width: 6),
                   Icon(Icons.chevron_right, size: 20),
                 ],
@@ -495,10 +412,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.divider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 24),
               // Avatar grande
@@ -507,11 +421,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 backgroundColor: avatarColor.withValues(alpha: 0.15),
                 child: Text(
                   _initials(user.nombre),
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: avatarColor,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: avatarColor),
                 ),
               ),
               const SizedBox(height: 14),
@@ -521,60 +431,30 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 children: [
                   Text(
                     user.nombre,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: info.bg,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: info.bg, borderRadius: BorderRadius.circular(8)),
                     child: Text(
                       info.label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: info.fg,
-                      ),
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: info.fg),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
-              Text(
-                user.email,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary.withValues(alpha: 0.7),
-                ),
-              ),
+              Text(user.email, style: TextStyle(fontSize: 14, color: AppColors.textSecondary.withValues(alpha: 0.7))),
               const SizedBox(height: 24),
               // Info cards row
               Row(
                 children: [
-                  _detailInfoCard(
-                    Icons.location_on_outlined,
-                    'Ubicación',
-                    location,
-                  ),
+                  _detailInfoCard(Icons.location_on_outlined, 'Ubicación', location),
                   const SizedBox(width: 12),
-                  _detailInfoCard(
-                    Icons.shopping_bag_outlined,
-                    'Compras',
-                    '$purchases',
-                  ),
+                  _detailInfoCard(Icons.shopping_bag_outlined, 'Compras', '$purchases'),
                   const SizedBox(width: 12),
-                  _detailInfoCard(
-                    Icons.phone_outlined,
-                    'Teléfono',
-                    user.telefono ?? 'N/A',
-                  ),
+                  _detailInfoCard(Icons.phone_outlined, 'Teléfono', user.telefono ?? 'N/A'),
                 ],
               ),
               const SizedBox(height: 20),
@@ -583,24 +463,18 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.inputFill,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: AppColors.inputFill, borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today_outlined,
-                          size: 16,
-                          color:
-                              AppColors.textSecondary.withValues(alpha: 0.6)),
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 16,
+                        color: AppColors.textSecondary.withValues(alpha: 0.6),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Cliente desde: ${_formatDate(user.creadoEn!)}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color:
-                              AppColors.textSecondary.withValues(alpha: 0.7),
-                        ),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary.withValues(alpha: 0.7)),
                       ),
                     ],
                   ),
@@ -616,31 +490,20 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          user.telefono != null
-                              ? 'Llamando a ${user.telefono}...'
-                              : 'Sin teléfono registrado',
+                          user.telefono != null ? 'Llamando a ${user.telefono}...' : 'Sin teléfono registrado',
                         ),
                         behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     );
                   },
                   icon: const Icon(Icons.phone, size: 20),
-                  label: const Text(
-                    'Contactar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  label: const Text('Contactar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF27AE60),
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
               ),
@@ -655,10 +518,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.inputFill,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(color: AppColors.inputFill, borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
             Icon(icon, size: 20, color: const Color(0xFFE8734A)),
@@ -667,20 +527,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary.withValues(alpha: 0.6),
-              ),
-            ),
+            Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary.withValues(alpha: 0.6))),
           ],
         ),
       ),
@@ -690,10 +540,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   String _formatDate(String isoDate) {
     try {
       final dt = DateTime.parse(isoDate);
-      const months = [
-        'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-        'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-      ];
+      const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
       return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
     } catch (_) {
       return isoDate;
