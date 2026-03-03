@@ -11,6 +11,7 @@ import 'package:cerisa_app/features/orders/presentation/screens/my_orders_screen
 import 'package:cerisa_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:cerisa_app/features/admin_dashboard/presentation/screens/admin_dashboard_screen.dart';
 import 'package:cerisa_app/features/admin_orders/presentation/screens/admin_orders_screen.dart';
+import 'package:cerisa_app/features/admin_users/presentation/screens/admin_users_screen.dart';
 
 /// Pantalla principal de la aplicación con barra de navegación inferior.
 ///
@@ -61,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return const AdminOrdersScreen();
       case 3:
+        return const AdminUsersScreen();
+      case 4:
         return const ProfileScreen();
       default:
         return const AdminDashboardScreen();
@@ -73,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     // Solo reconstruir cuando isAdmin cambie, no en cada notificación de AuthProvider
     final isAdmin = context.select<AuthProvider, bool>((a) => a.isAdmin);
-    final maxIndex = isAdmin ? 3 : 4;
+    final maxIndex = isAdmin ? 4 : 4;
 
     // Asegurar que el índice sea válido al cambiar de rol
     if (_currentIndex > maxIndex) {
@@ -135,9 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(0, Icons.grid_view_outlined, Icons.grid_view_rounded, 'INICIO'),
-              _buildNavItem(1, Icons.storefront_outlined, Icons.storefront, 'MERCADO'),
+              _buildNavItem(1, Icons.storefront_outlined, Icons.storefront, 'CATÁLOGO'),
               _buildNavItem(2, Icons.receipt_long_outlined, Icons.receipt_long, 'PEDIDOS'),
-              _buildNavItem(3, Icons.person_outline, Icons.person_rounded, 'PERFIL'),
+              _buildNavItem(3, Icons.people_outline, Icons.people_rounded, 'CLIENTES'),
+              _buildNavItem(4, Icons.person_outline, Icons.person_rounded, 'PERFIL'),
             ],
           ),
         ),

@@ -85,6 +85,56 @@ class AdminProductsProvider extends ChangeNotifier {
     }
   }
 
+  /// Actualización optimista de stock: modifica localmente primero y
+  /// luego sincroniza con el servidor sin recargar toda la lista.
+  /// Si falla, revierte al valor anterior.
+  Future<bool> updateStockOnly(int id, int newStock) async {
+    // Encontrar el producto
+    final idx = _products.indexWhere((p) => p.id == id);
+    if (idx == -1) return false;
+
+    final product = _products[idx];
+    final oldStock = product.stock;
+
+    // Optimistic update: cambiar localmente de inmediato
+    _products[idx] = ProductModel(
+      id: product.id,
+      nombre: product.nombre,
+      descripcion: product.descripcion,
+      precio: product.precio,
+      stock: newStock,
+      categoria: product.categoria,
+      imagenUrl: product.imagenUrl,
+    );
+    notifyListeners();
+
+    // Enviar al servidor sin recargar la lista completa
+    try {
+      await _api.put('/products/$id', {
+        'nombre': product.nombre,
+        'descripcion': product.descripcion ?? '',
+        'precio': product.precio,
+        'stock': newStock,
+        'categoria': product.categoria ?? '',
+      }, auth: true);
+      return true;
+    } catch (e) {
+      // Revertir en caso de error
+      _products[idx] = ProductModel(
+        id: product.id,
+        nombre: product.nombre,
+        descripcion: product.descripcion,
+        precio: product.precio,
+        stock: oldStock,
+        categoria: product.categoria,
+        imagenUrl: product.imagenUrl,
+      );
+      _error = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Elimina un producto del servidor.
   ///
   /// Envía `DELETE /products/{id}` con autenticación JWT.
