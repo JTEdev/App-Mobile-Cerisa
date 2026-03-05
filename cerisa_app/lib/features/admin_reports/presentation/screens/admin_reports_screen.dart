@@ -99,20 +99,13 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           const SizedBox(width: 14),
           const Text(
             'Reportes',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
           ),
           const Spacer(),
           Container(
             width: 42,
             height: 42,
-            decoration: BoxDecoration(
-              color: _kOrange.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: _kOrange.withValues(alpha: 0.12), shape: BoxShape.circle),
             child: const Icon(Icons.share_outlined, color: _kOrange, size: 20),
           ),
         ],
@@ -166,27 +159,18 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           ),
           const SizedBox(width: 12),
           // Separador
-          Container(
-            width: 1,
-            height: 24,
-            color: AppColors.divider.withValues(alpha: 0.4),
-          ),
+          Container(width: 1, height: 24, color: AppColors.divider.withValues(alpha: 0.4)),
           const SizedBox(width: 12),
           // Año pill
           GestureDetector(
             onTap: () {
               setState(() {
-                _selectedYear = _selectedYear == DateTime.now().year
-                    ? DateTime.now().year - 1
-                    : DateTime.now().year;
+                _selectedYear = _selectedYear == DateTime.now().year ? DateTime.now().year - 1 : DateTime.now().year;
               });
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                color: _kDarkBrown,
-                borderRadius: BorderRadius.circular(24),
-              ),
+              decoration: BoxDecoration(color: _kDarkBrown, borderRadius: BorderRadius.circular(24)),
               child: Text(
                 '$_selectedYear',
                 style: const TextStyle(
@@ -345,12 +329,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                 ),
                 child: const Text(
                   'MÁS VENDIDOS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: _kGreen,
-                    letterSpacing: 0.5,
-                  ),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: _kGreen, letterSpacing: 0.5),
                 ),
               ),
             ],
@@ -361,10 +340,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16)),
               child: const Text(
                 'No hay datos de ventas aún',
                 textAlign: TextAlign.center,
@@ -383,12 +359,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                 Icons.emoji_objects_outlined,
                 Icons.spa_outlined,
               ][i % 4];
-              final iconBg = [
-                _kOrange,
-                _kRed.withValues(alpha: 0.8),
-                _kAmber,
-                _kGreen,
-              ][i % 4];
+              final iconBg = [_kOrange, _kRed.withValues(alpha: 0.8), _kAmber, _kGreen][i % 4];
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -429,10 +400,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                           const SizedBox(height: 3),
                           Text(
                             '${p.totalVendido} unidades vendidas',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary.withValues(alpha: 0.7),
-                            ),
+                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary.withValues(alpha: 0.7)),
                           ),
                         ],
                       ),
@@ -443,11 +411,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                       children: [
                         Text(
                           '+$growthPct%',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: _kGreen,
-                          ),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kGreen),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -532,9 +496,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                             curve: Curves.easeOutCubic,
                             height: 120 * ratio,
                             decoration: BoxDecoration(
-                              color: isHighest
-                                  ? _kOrange
-                                  : _kOrange.withValues(alpha: 0.18),
+                              color: isHighest ? _kOrange : _kOrange.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
@@ -545,9 +507,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: isHighest
-                                  ? AppColors.textPrimary
-                                  : AppColors.textSecondary.withValues(alpha: 0.6),
+                              color: isHighest ? AppColors.textPrimary : AppColors.textSecondary.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -569,10 +529,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
 
   String _formatMoney(double v) {
     final parts = v.toStringAsFixed(2).split('.');
-    final intPart = parts[0].replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    );
+    final intPart = parts[0].replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
     return '$intPart.${parts[1]}';
   }
 }
@@ -609,16 +566,8 @@ class _MetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border(
-          left: BorderSide(color: accentColor, width: 4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border(left: BorderSide(color: accentColor, width: 4)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 3))],
       ),
       child: Row(
         children: [
@@ -639,11 +588,7 @@ class _MetricCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -653,11 +598,7 @@ class _MetricCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: subtitleColor,
-                        ),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: subtitleColor),
                       ),
                     ),
                   ],
@@ -669,10 +610,7 @@ class _MetricCard extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(
-              color: trailingIconColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: trailingIconColor.withValues(alpha: 0.12), shape: BoxShape.circle),
             child: Icon(trailingIcon, color: trailingIconColor, size: 26),
           ),
         ],
