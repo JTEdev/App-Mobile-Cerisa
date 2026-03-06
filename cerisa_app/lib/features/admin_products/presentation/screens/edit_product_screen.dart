@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cerisa_app/core/theme/app_theme.dart';
+import 'package:cerisa_app/core/services/api_service.dart';
 import 'package:cerisa_app/features/catalog/presentation/providers/catalog_provider.dart';
 import 'package:cerisa_app/features/admin_products/presentation/providers/admin_products_provider.dart';
 
@@ -30,6 +33,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
   late int _stock;
   bool _publicado = true;
   bool _isSaving = false;
+  bool _isUploading = false;
+
+  /// Imagen seleccionada localmente (antes de subir).
+  File? _pickedImage;
+
+  /// URL de imagen actual del producto (del servidor).
+  String? _currentImageUrl;
+
+  final _picker = ImagePicker();
 
   bool get _isEditing => widget.product != null;
 
@@ -47,6 +59,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _skuCtrl = TextEditingController(text: p != null ? _generateSku(p) : '');
     _stock = p?.stock ?? 0;
     _publicado = p != null ? p.stock > 0 : true;
+    _currentImageUrl = p?.imagenUrl;
   }
 
   String _generateSku(ProductModel p) {
@@ -76,6 +89,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       'precio': double.parse(_precioCtrl.text),
       'stock': _stock,
       'categoria': _categoriaCtrl.text.trim(),
+      if (_currentImageUrl != null) 'imagenUrl': _currentImageUrl,
     };
 
     final provider = context.read<AdminProductsProvider>();
@@ -83,8 +97,22 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     if (_isEditing) {
       ok = await provider.updateProduct(widget.product!.id, data);
+      // Si hay imagen local pendiente, subirla
+      if (ok && _pickedImage != null) {
+        await _uploadImage(_pickedImage!);
+      }
     } else {
-      ok = await provider.createProduct(data);
+      final newId = await provider.createProduct(data);
+      ok = newId > 0;
+      // Si se creó el producto y hay imagen local, subirla
+      if (ok && _pickedImage != null) {
+        final api = context.read<ApiService>();
+        try {
+          await api.uploadFile('/products/$newId/image', filePath: _pickedImage!.path);
+        } catch (_) {
+          // Producto creado pero imagen falló — no bloquear
+        }
+      }
     }
 
     if (!mounted) return;
@@ -225,65 +253,141 @@ class _EditProductScreenState extends State<EditProductScreen> {
     );
   }
 
+  /// Selecciona una imagen de la galería y la sube al servidor.
+  Future<void> _pickAndUploadImage() async {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    final file = File(picked.path);
+    setState(() {
+      _pickedImage = file;
+    });
+
+    // Si estamos editando, subir inmediatamente
+    if (_isEditing) {
+      await _uploadImage(file);
+    }
+  }
+
+  /// Sube la imagen al servidor.
+  Future<void> _uploadImage(File file) async {
+    if (!_isEditing) return; // Solo para productos existentes
+    setState(() => _isUploading = true);
+    try {
+      final api = context.read<ApiService>();
+      final result = await api.uploadFile('/products/${widget.product!.id}/image', filePath: file.path);
+      final newUrl = result['imagenUrl'] as String?;
+      if (newUrl != null && mounted) {
+        setState(() {
+          _currentImageUrl = newUrl;
+        });
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Imagen actualizada'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al subir imagen: ${e.toString().replaceFirst("Exception: ", "")}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+    if (mounted) setState(() => _isUploading = false);
+  }
+
+  /// Construye la URL completa de la imagen para mostrar.
+  String? _fullImageUrl(String? relativeUrl) {
+    if (relativeUrl == null || relativeUrl.isEmpty) return null;
+    if (relativeUrl.startsWith('http')) return relativeUrl;
+    // Construir URL completa: base host + relative path
+    return 'http://10.0.2.2:8081$relativeUrl';
+  }
+
   /// Imagen principal con overlay "Actualizar Foto"
   Widget _buildMainImage() {
-    final imageUrl = widget.product?.imagenUrl;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        width: double.infinity,
-        height: 220,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Imagen
-            if (imageUrl != null && imageUrl.isNotEmpty)
-              Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _imagePlaceholder())
-            else
-              _imagePlaceholder(),
-            // Gradiente inferior
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
-                  ),
-                ),
-              ),
-            ),
-            // Botón "Actualizar Foto"
-            Positioned(
-              bottom: 14,
-              left: 0,
-              right: 0,
-              child: Center(
+    final fullUrl = _fullImageUrl(_currentImageUrl);
+    return GestureDetector(
+      onTap: _isUploading ? null : _pickAndUploadImage,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          width: double.infinity,
+          height: 220,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Imagen: local > network > placeholder
+              if (_pickedImage != null)
+                Image.file(_pickedImage!, fit: BoxFit.cover)
+              else if (fullUrl != null)
+                Image.network(fullUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _imagePlaceholder())
+              else
+                _imagePlaceholder(),
+              // Gradiente inferior
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
-                      SizedBox(width: 6),
-                      Text(
-                        'Actualizar Foto',
-                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
-                    ],
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              // Botón "Actualizar Foto" / indicador de carga
+              Positioned(
+                bottom: 14,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: _isUploading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
+                              SizedBox(width: 6),
+                              Text(
+                                'Actualizar Foto',
+                                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -298,7 +402,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   /// Fila de miniaturas + botón de agregar
   Widget _buildThumbnailGallery() {
-    final imageUrl = widget.product?.imagenUrl;
+    final fullUrl = _fullImageUrl(_currentImageUrl);
     return SizedBox(
       height: 64,
       child: Row(
@@ -306,8 +410,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
           // Miniatura principal (con borde naranja = seleccionada)
           _thumbnailBox(
             isSelected: true,
-            child: imageUrl != null && imageUrl.isNotEmpty
-                ? Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _thumbPlaceholder())
+            child: _pickedImage != null
+                ? Image.file(_pickedImage!, fit: BoxFit.cover)
+                : fullUrl != null
+                ? Image.network(fullUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _thumbPlaceholder())
                 : _thumbPlaceholder(),
           ),
           const SizedBox(width: 10),
@@ -317,14 +423,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
           _thumbnailBox(child: _thumbPlaceholder()),
           const SizedBox(width: 10),
           // Botón agregar foto
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE8734A).withValues(alpha: 0.3), width: 1.5),
+          GestureDetector(
+            onTap: _isUploading ? null : _pickAndUploadImage,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE8734A).withValues(alpha: 0.3), width: 1.5),
+              ),
+              child: const Center(child: Icon(Icons.add, color: Color(0xFFE8734A), size: 24)),
             ),
-            child: const Center(child: Icon(Icons.add, color: Color(0xFFE8734A), size: 24)),
           ),
         ],
       ),

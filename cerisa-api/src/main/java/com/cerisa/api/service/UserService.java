@@ -1,11 +1,13 @@
 package com.cerisa.api.service;
 
+import com.cerisa.api.dto.user.CreateUserRequest;
 import com.cerisa.api.dto.user.UpdateUserRoleRequest;
 import com.cerisa.api.dto.user.UserResponse;
 import com.cerisa.api.entity.Role;
 import com.cerisa.api.entity.User;
 import com.cerisa.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,9 @@ public class UserService {
 
     /** Repositorio para acceder a los datos de usuarios en la base de datos. */
     private final UserRepository userRepository;
+
+    /** Encoder para cifrar contraseñas. */
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Obtiene la lista de todos los usuarios registrados en el sistema.
@@ -73,6 +78,63 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
 
         user.setRol(Role.valueOf(request.getRol()));
+        User updated = userRepository.save(user);
+        return toResponse(updated);
+    }
+
+    /**
+     * Crea un nuevo usuario con rol CLIENTE desde el panel de administración.
+     *
+     * @param request datos del nuevo cliente
+     * @return {@link UserResponse} con los datos del usuario creado
+     * @throws RuntimeException si el email ya está registrado
+     */
+    public UserResponse createUser(CreateUserRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Ya existe un usuario con el email: " + request.getEmail());
+        }
+
+        User user = new User();
+        user.setNombre(request.getNombre());
+        user.setEmail(request.getEmail());
+        user.setTelefono(request.getTelefono());
+        user.setRol(Role.CLIENTE);
+
+        // Si no se proporciona contraseña, generar una por defecto
+        String rawPassword = request.getPassword() != null && !request.getPassword().isBlank()
+                ? request.getPassword()
+                : "Cerisa2026";
+        user.setPassword(passwordEncoder.encode(rawPassword));
+
+        User saved = userRepository.save(user);
+        return toResponse(saved);
+    }
+
+    /**
+     * Actualiza los datos de un usuario existente (nombre, teléfono).
+     *
+     * @param id      el identificador del usuario
+     * @param request datos actualizados
+     * @return {@link UserResponse} con los datos actualizados
+     */
+    public UserResponse updateUser(Long id, CreateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        user.setNombre(request.getNombre());
+        if (request.getTelefono() != null) {
+            user.setTelefono(request.getTelefono());
+        }
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            // Verificar que el nuevo email no esté en uso por otro usuario
+            userRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
+                if (!existing.getId().equals(id)) {
+                    throw new RuntimeException("Ya existe un usuario con el email: " + request.getEmail());
+                }
+            });
+            user.setEmail(request.getEmail());
+        }
+
         User updated = userRepository.save(user);
         return toResponse(updated);
     }

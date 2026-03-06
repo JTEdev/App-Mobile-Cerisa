@@ -68,6 +68,9 @@ public class SecurityConfig {
                         // --- Auth endpoints: públicos (login y registro) ---
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // --- Uploads: imágenes públicas ---
+                        .requestMatchers("/uploads/**").permitAll()
+
                         // --- Products: GET público, CUD solo admin ---
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")

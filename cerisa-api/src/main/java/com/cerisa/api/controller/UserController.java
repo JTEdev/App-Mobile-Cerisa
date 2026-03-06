@@ -1,5 +1,6 @@
 package com.cerisa.api.controller;
 
+import com.cerisa.api.dto.user.CreateUserRequest;
 import com.cerisa.api.dto.user.UpdateUserRoleRequest;
 import com.cerisa.api.dto.user.UserResponse;
 import com.cerisa.api.service.UserService;
@@ -97,5 +98,23 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Crea un nuevo cliente desde el panel de administración.
+     */
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+        return ResponseEntity.ok(userService.createUser(request));
+    }
+
+    /**
+     * Actualiza los datos de un usuario (nombre, teléfono, email).
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateUserRequest request) {
+        return ResponseEntity.ok(userService.updateUser(id, request));
     }
 }

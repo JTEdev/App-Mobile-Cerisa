@@ -192,11 +192,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           ),
           const Spacer(),
           // Botón agregar cliente
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(color: const Color(0xFFE8734A).withValues(alpha: 0.12), shape: BoxShape.circle),
-            child: const Icon(Icons.person_add_outlined, color: Color(0xFFE8734A), size: 22),
+          GestureDetector(
+            onTap: () => _showClientForm(),
+            child: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(color: const Color(0xFFE8734A).withValues(alpha: 0.12), shape: BoxShape.circle),
+              child: const Icon(Icons.person_add_outlined, color: Color(0xFFE8734A), size: 22),
+            ),
           ),
         ],
       ),
@@ -384,6 +387,232 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   // ─────────────────────────────────────────────────────────────
+  // ADD / EDIT CLIENT FORM
+  // ─────────────────────────────────────────────────────────────
+
+  void _showClientForm({UserModel? user}) {
+    final isEditing = user != null;
+    final nombreCtrl = TextEditingController(text: user?.nombre ?? '');
+    final emailCtrl = TextEditingController(text: user?.email ?? '');
+    final telefonoCtrl = TextEditingController(text: user?.telefono ?? '');
+    final passwordCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool saving = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+                decoration: const BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Handle
+                        Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(2)),
+                        ),
+                        const SizedBox(height: 20),
+                        // Título
+                        Text(
+                          isEditing ? 'Editar Cliente' : 'Nuevo Cliente',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Nombre
+                        _formField(
+                          controller: nombreCtrl,
+                          label: 'Nombre completo',
+                          icon: Icons.person_outlined,
+                          validator: (v) => (v == null || v.trim().length < 2) ? 'Mínimo 2 caracteres' : null,
+                        ),
+                        const SizedBox(height: 14),
+                        // Email
+                        _formField(
+                          controller: emailCtrl,
+                          label: 'Correo electrónico',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'El email es obligatorio';
+                            if (!v.contains('@') || !v.contains('.')) return 'Email inválido';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        // Teléfono
+                        _formField(
+                          controller: telefonoCtrl,
+                          label: 'Número de celular',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 14),
+                        // Contraseña (solo para nuevo)
+                        if (!isEditing)
+                          _formField(
+                            controller: passwordCtrl,
+                            label: 'Contraseña (opcional)',
+                            icon: Icons.lock_outlined,
+                            obscure: true,
+                            hint: 'Se usará Cerisa2026 por defecto',
+                          ),
+                        if (!isEditing) const SizedBox(height: 14),
+                        const SizedBox(height: 10),
+                        // Botón guardar
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: saving
+                                ? null
+                                : () async {
+                                    if (!formKey.currentState!.validate()) return;
+                                    setSheetState(() => saving = true);
+
+                                    final provider = context.read<AdminUsersProvider>();
+                                    final data = <String, dynamic>{
+                                      'nombre': nombreCtrl.text.trim(),
+                                      'email': emailCtrl.text.trim(),
+                                    };
+                                    final tel = telefonoCtrl.text.trim();
+                                    if (tel.isNotEmpty) data['telefono'] = tel;
+                                    if (!isEditing && passwordCtrl.text.isNotEmpty) {
+                                      data['password'] = passwordCtrl.text;
+                                    }
+
+                                    bool ok;
+                                    if (isEditing) {
+                                      ok = await provider.updateClient(user.id, data);
+                                    } else {
+                                      ok = await provider.createClient(data);
+                                    }
+
+                                    setSheetState(() => saving = false);
+
+                                    if (!ctx.mounted) return;
+                                    if (ok) {
+                                      Navigator.pop(ctx);
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              isEditing ? 'Cliente actualizado' : 'Cliente creado exitosamente',
+                                            ),
+                                            backgroundColor: AppColors.success,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          ),
+                                        );
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(provider.error ?? 'Error desconocido'),
+                                          backgroundColor: AppColors.error,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                      );
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE8734A),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
+                            child: saving
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text(
+                                    isEditing ? 'ACTUALIZAR CLIENTE' : 'CREAR CLIENTE',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _formField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    bool obscure = false,
+    String? hint,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscure,
+      validator: validator,
+      style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        hintStyle: TextStyle(fontSize: 13, color: AppColors.textSecondary.withValues(alpha: 0.4)),
+        labelStyle: TextStyle(fontSize: 14, color: AppColors.textSecondary.withValues(alpha: 0.6)),
+        prefixIcon: Icon(icon, size: 20, color: const Color(0xFFE8734A).withValues(alpha: 0.7)),
+        filled: true,
+        fillColor: AppColors.inputFill,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE8734A), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
   // CLIENT DETAIL BOTTOM SHEET
   // ─────────────────────────────────────────────────────────────
 
@@ -480,29 +709,74 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ),
                 ),
               const SizedBox(height: 20),
-              // Botón llamar
+              // Botones: Editar + Contactar
+              Row(
+                children: [
+                  // Botón editar
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _showClientForm(user: user);
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        label: const Text('Editar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFE8734A),
+                          side: const BorderSide(color: Color(0xFFE8734A), width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Botón contactar
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                user.telefono != null ? 'Llamando a ${user.telefono}...' : 'Sin teléfono registrado',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.phone, size: 20),
+                        label: const Text('Contactar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF27AE60),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Botón eliminar
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
+                height: 46,
+                child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          user.telefono != null ? 'Llamando a ${user.telefono}...' : 'Sin teléfono registrado',
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
+                    _confirmDelete(user);
                   },
-                  icon: const Icon(Icons.phone, size: 20),
-                  label: const Text('Contactar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF27AE60),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
+                  icon: const Icon(Icons.delete_outline, size: 20),
+                  label: const Text('Eliminar cliente', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error, width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
@@ -511,6 +785,41 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _confirmDelete(UserModel user) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Eliminar cliente', style: TextStyle(fontWeight: FontWeight.w700)),
+        content: Text('¿Eliminar a "${user.nombre}"? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    final ok = await context.read<AdminUsersProvider>().deleteUser(user.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Cliente eliminado' : 'Error al eliminar'),
+        backgroundColor: ok ? AppColors.success : AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 

@@ -376,7 +376,9 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> with SingleTi
             borderRadius: BorderRadius.circular(12),
             child: product.imagenUrl != null && product.imagenUrl!.isNotEmpty
                 ? Image.network(
-                    product.imagenUrl!,
+                    product.imagenUrl!.startsWith('http')
+                        ? product.imagenUrl!
+                        : 'http://10.0.2.2:8081${product.imagenUrl!}',
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -652,7 +654,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> with SingleTi
                       if (product != null) {
                         ok = await provider.updateProduct(product.id, data);
                       } else {
-                        ok = await provider.createProduct(data);
+                        ok = await provider.createProduct(data) > 0;
                       }
                       if (ok) {
                         _initialized = false;

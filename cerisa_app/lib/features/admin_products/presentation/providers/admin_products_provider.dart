@@ -56,15 +56,25 @@ class AdminProductsProvider extends ChangeNotifier {
   /// Envía `POST /products` con los datos proporcionados.
   /// Si es exitoso, recarga la lista de productos.
   /// Retorna `true` si la creación fue exitosa.
-  Future<bool> createProduct(Map<String, dynamic> data) async {
+  /// Retorna el ID del producto creado, o -1 si falla.
+  Future<int> createProduct(Map<String, dynamic> data) async {
     try {
-      await _api.post('/products', data, auth: true);
+      final result = await _api.post('/products', data, auth: true);
       await loadProducts();
-      return true;
+      if (result is Map && result['id'] != null) {
+        return (result['id'] as num).toInt();
+      }
+      // Si no viene ID, buscar por nombre en la lista recargada
+      final nombre = data['nombre'] as String?;
+      if (nombre != null) {
+        final found = _products.where((p) => p.nombre == nombre).toList();
+        if (found.isNotEmpty) return found.last.id;
+      }
+      return -1;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
       notifyListeners();
-      return false;
+      return -1;
     }
   }
 

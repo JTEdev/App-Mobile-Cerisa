@@ -99,6 +99,32 @@ class ApiService {
     if (response.statusCode >= 300) throw _parseError(response);
   }
 
+  /// Sube un archivo vía multipart POST.
+  ///
+  /// [path] es la ruta relativa (ej: `/products/1/image`).
+  /// [filePath] es la ruta absoluta del archivo en el dispositivo.
+  /// [fieldName] es el nombre del campo multipart (default: `file`).
+  Future<Map<String, dynamic>> uploadFile(
+    String path, {
+    required String filePath,
+    String fieldName = 'file',
+    bool auth = true,
+  }) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}$path');
+    final request = http.MultipartRequest('POST', uri);
+
+    if (auth) {
+      final t = _storage.token;
+      if (t != null) request.headers['Authorization'] = 'Bearer $t';
+    }
+
+    request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
+
+    final streamed = await request.send().timeout(const Duration(seconds: 30));
+    final response = await http.Response.fromStream(streamed);
+    return _handleResponse(response);
+  }
+
   /// Procesa la respuesta HTTP y devuelve el cuerpo decodificado.
   ///
   /// Si el código de estado es exitoso (2xx), decodifica el JSON.

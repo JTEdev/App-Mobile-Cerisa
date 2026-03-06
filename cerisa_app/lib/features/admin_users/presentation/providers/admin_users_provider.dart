@@ -141,4 +141,36 @@ class AdminUsersProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  /// Crea un nuevo cliente desde el panel de administración.
+  ///
+  /// Llama a POST /api/users con los datos del nuevo cliente.
+  /// Retorna `true` si la creación fue exitosa.
+  Future<bool> createClient(Map<String, dynamic> data) async {
+    try {
+      await _api.post('/users', data, auth: true);
+      await loadUsers();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Actualiza los datos de un cliente existente.
+  ///
+  /// Llama a PUT /api/users/{id} con los datos actualizados.
+  /// Retorna `true` si la actualización fue exitosa.
+  Future<bool> updateClient(int userId, Map<String, dynamic> data) async {
+    try {
+      await _api.put('/users/$userId', data, auth: true);
+      await loadUsers();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
 }
