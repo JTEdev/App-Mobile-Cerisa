@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST que expone los endpoints de reportes de ventas.
@@ -74,5 +75,15 @@ public class ReportController {
     @GetMapping("/top-products")
     public ResponseEntity<List<TopProductResponse>> getTopProducts() {
         return ResponseEntity.ok(reportService.getTopProducts());
+    }
+
+    @GetMapping("/yearly")
+    public ResponseEntity<ReportResponse> getYearlyReport() {
+        return ResponseEntity.ok(reportService.getYearlyReport());
+    }
+
+    @GetMapping("/weekly-trend")
+    public ResponseEntity<Map<String, Double>> getWeeklyTrend() {
+        return ResponseEntity.ok(reportService.getWeeklyTrend());
     }
 }

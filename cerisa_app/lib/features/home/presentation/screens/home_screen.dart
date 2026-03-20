@@ -22,8 +22,13 @@ import 'package:cerisa_app/features/admin_users/presentation/screens/admin_users
 /// Usa [IndexedStack] para mantener el estado de cada pestaña al
 /// cambiar entre ellas sin reconstruir los widgets.
 class HomeScreen extends StatefulWidget {
-  /// Constructor constante.
   const HomeScreen({super.key});
+
+  static final GlobalKey<_HomeScreenState> globalKey = GlobalKey<_HomeScreenState>();
+
+  static void switchToTab(int index) {
+    globalKey.currentState?.setTab(index);
+  }
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,8 +36,11 @@ class HomeScreen extends StatefulWidget {
 
 /// Estado de [HomeScreen] que gestiona la pestaña seleccionada.
 class _HomeScreenState extends State<HomeScreen> {
-  /// Índice de la pestaña actualmente seleccionada (0 = Inicio).
   int _currentIndex = 0;
+
+  void setTab(int index) {
+    if (mounted) setState(() => _currentIndex = index);
+  }
 
   /// Construye la pantalla correspondiente al índice para CLIENTE.
   Widget _buildClientScreen(int index) {

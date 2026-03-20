@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cerisa_app/core/theme/app_theme.dart';
 import 'package:cerisa_app/core/widgets/common_widgets.dart';
 import 'package:cerisa_app/features/admin_products/presentation/providers/admin_products_provider.dart';
+import 'package:cerisa_app/core/widgets/admin_bottom_nav.dart';
 import 'package:cerisa_app/features/catalog/presentation/providers/catalog_provider.dart';
 import 'package:cerisa_app/core/routes/app_routes.dart';
 
@@ -109,6 +110,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> with SingleTi
           ),
         ],
       ),
+      bottomNavigationBar: const AdminBottomNav(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showProductForm(context),
         backgroundColor: const Color(0xFFE8734A),

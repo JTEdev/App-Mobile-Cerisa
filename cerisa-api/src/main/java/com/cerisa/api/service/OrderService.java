@@ -46,6 +46,9 @@ public class OrderService {
         /** Repositorio para acceder a los datos de usuarios. */
         private final UserRepository userRepository;
 
+        /** Servicio de notificaciones para generar alertas automáticas. */
+        private final NotificationService notificationService;
+
         /**
          * Crea un nuevo pedido para el usuario autenticado.
          * <p>
@@ -113,6 +116,7 @@ public class OrderService {
                 // Establecer el total calculado y guardar el pedido completo
                 order.setTotal(total);
                 Order saved = orderRepository.save(order);
+                notificationService.onNewOrder(saved);
                 return toResponse(saved);
         }
 
@@ -166,7 +170,12 @@ public class OrderService {
                                         + ". Valores válidos: PENDIENTE, CONFIRMADO, EN_PREPARACION, ENVIADO, ENTREGADO, CANCELADO");
                 }
 
-                return toResponse(orderRepository.save(order));
+                Order updated = orderRepository.save(order);
+                notificationService.onOrderStatusChanged(updated);
+                if (updated.getEstado() == OrderStatus.CONFIRMADO) {
+                        notificationService.onPaymentReceived(updated);
+                }
+                return toResponse(updated);
         }
 
         /**

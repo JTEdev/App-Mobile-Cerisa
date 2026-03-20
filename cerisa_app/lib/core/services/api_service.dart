@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:cerisa_app/core/constants/api_constants.dart';
 import 'package:cerisa_app/core/services/storage_service.dart';
 
@@ -118,7 +119,30 @@ class ApiService {
       if (t != null) request.headers['Authorization'] = 'Bearer $t';
     }
 
-    request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
+    // Detect content type from file extension
+    final ext = filePath.split('.').last.toLowerCase();
+    MediaType? contentType;
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        contentType = MediaType('image', 'jpeg');
+        break;
+      case 'png':
+        contentType = MediaType('image', 'png');
+        break;
+      case 'webp':
+        contentType = MediaType('image', 'webp');
+        break;
+      case 'gif':
+        contentType = MediaType('image', 'gif');
+        break;
+    }
+
+    request.files.add(await http.MultipartFile.fromPath(
+      fieldName,
+      filePath,
+      contentType: contentType,
+    ));
 
     final streamed = await request.send().timeout(const Duration(seconds: 30));
     final response = await http.Response.fromStream(streamed);

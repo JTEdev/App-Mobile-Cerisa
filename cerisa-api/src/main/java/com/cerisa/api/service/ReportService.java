@@ -11,7 +11,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Servicio que genera reportes de ventas para el panel de administración.
@@ -41,10 +43,11 @@ public class ReportService {
      * @return el reporte con métricas del día actual
      */
     public ReportResponse getDailyReport() {
-        // Definir el rango del día actual: inicio y fin del día
         LocalDateTime desde = LocalDate.now().atStartOfDay();
         LocalDateTime hasta = LocalDate.now().atTime(LocalTime.MAX);
-        return buildReport("Diario - " + LocalDate.now(), desde, hasta);
+        LocalDateTime desdeAnt = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime hastaAnt = LocalDate.now().minusDays(1).atTime(LocalTime.MAX);
+        return buildReport("Diario - " + LocalDate.now(), desde, hasta, desdeAnt, hastaAnt);
     }
 
     /**
@@ -55,10 +58,12 @@ public class ReportService {
      */
     public ReportResponse getMonthlyReport() {
         LocalDate now = LocalDate.now();
-        // Definir el rango del mes: primer día al último día del mes
         LocalDateTime desde = now.withDayOfMonth(1).atStartOfDay();
         LocalDateTime hasta = now.withDayOfMonth(now.lengthOfMonth()).atTime(LocalTime.MAX);
-        return buildReport("Mensual - " + now.getMonth() + " " + now.getYear(), desde, hasta);
+        LocalDate prevMonth = now.minusMonths(1);
+        LocalDateTime desdeAnt = prevMonth.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime hastaAnt = prevMonth.withDayOfMonth(prevMonth.lengthOfMonth()).atTime(LocalTime.MAX);
+        return buildReport("Mensual - " + now.getMonth() + " " + now.getYear(), desde, hasta, desdeAnt, hastaAnt);
     }
 
     /**
@@ -95,13 +100,12 @@ public class ReportService {
      * @param hasta   fecha y hora de fin del rango
      * @return el reporte completo con todas las métricas
      */
-    private ReportResponse buildReport(String periodo, LocalDateTime desde, LocalDateTime hasta) {
-        // Obtener el número total de pedidos en el período
+    private ReportResponse buildReport(String periodo, LocalDateTime desde, LocalDateTime hasta,
+                                         LocalDateTime desdeAnt, LocalDateTime hastaAnt) {
         Long totalPedidos = orderRepository.countByFechaRange(desde, hasta);
-        // Obtener el monto total de ventas (excluyendo pedidos cancelados)
         BigDecimal totalVentas = orderRepository.sumTotalByFechaRange(desde, hasta);
+        BigDecimal ventasAnterior = orderRepository.sumTotalByFechaRange(desdeAnt, hastaAnt);
 
-        // Obtener los 10 productos más vendidos en el período
         List<TopProductResponse> topProducts = orderItemRepository.findTopProducts(desde, hasta).stream()
                 .limit(10)
                 .map(row -> TopProductResponse.builder()
@@ -111,12 +115,55 @@ public class ReportService {
                         .build())
                 .toList();
 
-        // Construir la respuesta con valores por defecto para nulos
         return ReportResponse.builder()
                 .periodo(periodo)
                 .totalPedidos(totalPedidos != null ? totalPedidos : 0L)
                 .totalVentas(totalVentas != null ? totalVentas : BigDecimal.ZERO)
+                .ventasAnterior(ventasAnterior != null ? ventasAnterior : BigDecimal.ZERO)
                 .topProductos(topProducts)
                 .build();
+    }
+
+    public ReportResponse getYearlyReport() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime desde = now.withDayOfYear(1).atStartOfDay();
+        LocalDateTime hasta = now.withMonth(12).withDayOfMonth(31).atTime(LocalTime.MAX);
+        LocalDate prevYear = now.minusYears(1);
+        LocalDateTime desdeAnt = prevYear.withDayOfYear(1).atStartOfDay();
+        LocalDateTime hastaAnt = prevYear.withMonth(12).withDayOfMonth(31).atTime(LocalTime.MAX);
+        return buildReport("Anual - " + now.getYear(), desde, hasta, desdeAnt, hastaAnt);
+    }
+
+    public Map<String, Double> getWeeklyTrend() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime desde = today.minusDays(6).atStartOfDay();
+        LocalDateTime hasta = today.atTime(LocalTime.MAX);
+        List<Object[]> rows = orderRepository.sumTotalByDay(desde, hasta);
+        String[] dayLabels = {"L", "M", "X", "J", "V", "S", "D"};
+        Map<String, Double> trend = new LinkedHashMap<>();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = today.minusDays(i);
+            int dow = day.getDayOfWeek().getValue();
+            trend.put(dayLabels[dow - 1], 0.0);
+        }
+        for (Object[] row : rows) {
+            LocalDate day = (LocalDate) row[0];
+            BigDecimal total = (BigDecimal) row[1];
+            int idx = (int) java.time.temporal.ChronoUnit.DAYS.between(today.minusDays(6), day);
+            if (idx >= 0 && idx < 7) {
+                int dow = day.getDayOfWeek().getValue();
+                String label = dayLabels[dow - 1];
+                // rebuild preserving order
+                int pos = 0;
+                for (var entry : trend.entrySet()) {
+                    if (pos == idx) {
+                        trend.put(entry.getKey(), total != null ? total.doubleValue() : 0.0);
+                        break;
+                    }
+                    pos++;
+                }
+            }
+        }
+        return trend;
     }
 }

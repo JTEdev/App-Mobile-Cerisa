@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:cerisa_app/core/widgets/admin_bottom_nav.dart';
 import 'package:provider/provider.dart';
 import 'package:cerisa_app/core/theme/app_theme.dart';
 import 'package:cerisa_app/features/admin_reports/presentation/providers/reports_provider.dart';
@@ -77,8 +78,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
             );
           },
         ),
-      ),
-    );
+      ),      bottomNavigationBar: const AdminBottomNav(),    );
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -213,12 +213,12 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   // ─────────────────────────────────────────────────────────────
 
   Widget _buildEstadoGeneral(ReportsProvider rp) {
-    // Datos del reporte mensual
-    final monthly = rp.monthlyReport;
-    final totalVentas = monthly?.totalVentas ?? 0.0;
-    final totalPedidos = monthly?.totalPedidos ?? 0;
+    // Get report for selected period
+    final report = rp.reportForPeriod(_periodIndex);
+    final totalVentas = report?.totalVentas ?? 0.0;
+    final growth = report?.growthPercent ?? 0.0;
 
-    // Datos del reporte diario para "Pedidos Hoy"
+    // Pedidos Hoy always from daily
     final daily = rp.dailyReport;
     final pedidosHoy = daily?.totalPedidos ?? 0;
 
@@ -234,23 +234,33 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
     } catch (_) {}
 
     if (productosSinStock >= 3) {
-      inventarioLabel = 'Crítico';
+      inventarioLabel = 'Cr\u00edtico';
       inventarioColor = _kRed;
       inventarioIcon = Icons.error;
       inventarioIconBg = _kRed;
     } else if (productosSinStock >= 1) {
-      inventarioLabel = 'Atención';
+      inventarioLabel = 'Atenci\u00f3n';
       inventarioColor = _kAmber;
       inventarioIcon = Icons.warning_rounded;
       inventarioIconBg = _kAmber;
     }
 
-    // Pendientes de envío
+    // Pendientes de env\u00edo
     int pendientes = 0;
     try {
       final ordProv = context.read<OrdersProvider>();
       pendientes = ordProv.orders.where((o) => o.estado == 'PENDIENTE').length;
     } catch (_) {}
+
+    // Growth label
+    final growthAbs = growth.abs().toStringAsFixed(0);
+    final periodLabels = ['al d\u00eda anterior', 'al mes pasado', 'al a\u00f1o anterior'];
+    final growthLabel = growth >= 0
+        ? '$growthAbs% superior ${periodLabels[_periodIndex]}'
+        : '$growthAbs% inferior ${periodLabels[_periodIndex]}';
+    final growthColor = growth >= 0 ? _kGreen : _kRed;
+    final growthIcon = growth >= 0 ? Icons.trending_up : Icons.trending_down;
+    final growthTrailingIcon = growth >= 0 ? Icons.check_circle : Icons.warning_rounded;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -260,24 +270,24 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           _MetricCard(
             label: 'INGRESOS',
             value: '\$${_formatMoney(totalVentas)}',
-            subtitle: '12% superior al mes pasado',
-            subtitleColor: _kGreen,
-            subtitleIcon: Icons.trending_up,
-            trailingIcon: Icons.check_circle,
-            trailingIconColor: _kGreen,
-            accentColor: _kGreen,
+            subtitle: growthLabel,
+            subtitleColor: growthColor,
+            subtitleIcon: growthIcon,
+            trailingIcon: growthTrailingIcon,
+            trailingIconColor: growthColor,
+            accentColor: growthColor,
           ),
           const SizedBox(height: 14),
           // PEDIDOS HOY card
           _MetricCard(
             label: 'PEDIDOS HOY',
             value: '$pedidosHoy',
-            subtitle: '$pendientes pedidos pendientes de envío',
+            subtitle: '$pendientes pedidos pendientes de env\u00edo',
             subtitleColor: _kOrange,
             subtitleIcon: Icons.access_time,
-            trailingIcon: Icons.warning_rounded,
-            trailingIconColor: _kAmber,
-            accentColor: _kAmber,
+            trailingIcon: pendientes > 0 ? Icons.warning_rounded : Icons.check_circle,
+            trailingIconColor: pendientes > 0 ? _kAmber : _kGreen,
+            accentColor: pendientes > 0 ? _kAmber : _kGreen,
           ),
           const SizedBox(height: 14),
           // INVENTARIO card
@@ -351,8 +361,6 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
             ...topProducts.take(4).toList().asMap().entries.map((entry) {
               final i = entry.key;
               final p = entry.value;
-              // Simulate growth % deterministic to product
-              final growthPct = [15, 8, 12, 5][i % 4];
               final iconData = [
                 Icons.local_florist,
                 Icons.rice_bowl_outlined,
@@ -405,25 +413,17 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                         ],
                       ),
                     ),
-                    // Growth
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '+$growthPct%',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kGreen),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'CRECIMIENTO',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textSecondary.withValues(alpha: 0.5),
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                    // Rank badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: iconBg.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '#${i + 1}',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: iconBg),
+                      ),
                     ),
                   ],
                 ),
@@ -439,20 +439,34 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   // ─────────────────────────────────────────────────────────────
 
   Widget _buildTendenciaSemanal(ReportsProvider rp) {
-    // Datos simulados de tendencia semanal
-    final monthly = rp.monthlyReport;
-    final baseValue = (monthly?.totalVentas ?? 500) / 7;
-    final bars = <double>[
-      baseValue * 0.4,
-      baseValue * 0.6,
-      baseValue * 1.5,
-      baseValue * 0.3,
-      baseValue * 0.5,
-      baseValue * 0.9,
-      baseValue * 0.7,
-    ];
+    final trend = rp.weeklyTrend;
+    final labels = trend.keys.toList();
+    final bars = trend.values.toList();
+
+    // Fallback if no data
+    if (bars.isEmpty || bars.every((v) => v == 0)) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'TENDENCIA SEMANAL',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
+              child: const Text('No hay ventas en los \u00faltimos 7 d\u00edas', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
+            ),
+          ],
+        ),
+      );
+    }
+
     final maxVal = bars.reduce(math.max);
-    const labels = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
@@ -461,12 +475,7 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         children: [
           const Text(
             'TENDENCIA SEMANAL',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 14),
           Container(
@@ -481,16 +490,15 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
               height: 170,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(7, (i) {
+                children: List.generate(bars.length, (i) {
                   final ratio = maxVal > 0 ? bars[i] / maxVal : 0.0;
-                  final isHighest = bars[i] == maxVal;
+                  final isHighest = bars[i] == maxVal && bars[i] > 0;
                   return Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          // Bar
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOutCubic,
@@ -501,7 +509,6 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          // Label
                           Text(
                             labels[i],
                             style: TextStyle(

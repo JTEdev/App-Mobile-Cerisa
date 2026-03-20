@@ -81,4 +81,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT SUM(o.total) FROM Order o WHERE o.creadoEn >= :desde AND o.creadoEn <= :hasta AND o.estado <> 'CANCELADO'")
     java.math.BigDecimal sumTotalByFechaRange(@Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta);
+
+    @Query("SELECT CAST(o.creadoEn AS LocalDate) AS dia, SUM(o.total) FROM Order o " +
+           "WHERE o.creadoEn >= :desde AND o.creadoEn <= :hasta AND o.estado <> 'CANCELADO' " +
+           "GROUP BY CAST(o.creadoEn AS LocalDate) ORDER BY dia")
+    List<Object[]> sumTotalByDay(@Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }

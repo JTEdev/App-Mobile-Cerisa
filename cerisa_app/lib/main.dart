@@ -16,6 +16,7 @@ import 'package:cerisa_app/features/admin_products/presentation/providers/admin_
 import 'package:cerisa_app/features/admin_reports/presentation/providers/reports_provider.dart';
 import 'package:cerisa_app/features/admin_users/presentation/providers/admin_users_provider.dart';
 import 'package:cerisa_app/features/favorites/presentation/providers/favorites_provider.dart';
+import 'package:cerisa_app/features/notifications/presentation/providers/notifications_provider.dart';
 
 /// Función principal que arranca la aplicación Flutter.
 ///
@@ -53,6 +54,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ReportsProvider(api)),
         ChangeNotifierProvider(create: (_) => AdminUsersProvider(api)),
         ChangeNotifierProvider(create: (_) => FavoritesProvider(api)),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider(api)),
       ],
       child: const CerisaApp(),
     ),

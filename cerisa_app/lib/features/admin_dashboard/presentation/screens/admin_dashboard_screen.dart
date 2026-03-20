@@ -1,15 +1,44 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cerisa_app/core/theme/app_theme.dart';
 import 'package:cerisa_app/core/routes/app_routes.dart';
 import 'package:cerisa_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:cerisa_app/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:cerisa_app/features/admin_reports/presentation/providers/reports_provider.dart';
 
 /// Pantalla de inicio del panel de administración.
 ///
 /// Muestra un dashboard con métricas de ventas, tendencia semanal,
 /// nivel del vendedor y accesos rápidos a la gestión operativa.
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  bool _loaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loaded) {
+      _loaded = true;
+      final rp = context.read<ReportsProvider>();
+      if (rp.dailyReport == null && !rp.isLoading) {
+        Future.microtask(() => rp.loadAll());
+      }
+    }
+  }
+
+  /// Formatea un número como moneda ($1,240.00)
+  String _formatCurrency(double amount) {
+    final f = NumberFormat('#,##0.00', 'en_US');
+    return '\$${f.format(amount)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +46,14 @@ class AdminDashboardScreen extends StatelessWidget {
     final userName = authProvider.userName ?? 'Admin';
     // Obtener solo el primer nombre
     final firstName = userName.split(' ').first;
+
+    // Cargar conteo de notificaciones no leídas
+    final notifProvider = context.watch<NotificationsProvider>();
+    if (notifProvider.unreadCount == 0 && !notifProvider.isLoading) {
+      Future.microtask(() => notifProvider.loadUnreadCount());
+    }
+
+    final rp = context.watch<ReportsProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -30,11 +67,11 @@ class AdminDashboardScreen extends StatelessWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 8),
-                _buildVentasHoyCard(),
+                _buildVentasHoyCard(rp),
                 const SizedBox(height: 12),
-                _buildTendenciaSemanalCard(),
+                _buildTendenciaSemanalCard(rp),
                 const SizedBox(height: 12),
-                _buildEstadoActualCard(),
+                _buildEstadoActualCard(rp),
                 const SizedBox(height: 24),
                 _buildSeccionGestionOperativa(context),
               ]),
@@ -47,6 +84,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   /// Header con gradiente oscuro, saludo y acciones
   Widget _buildHeader(BuildContext context, String firstName) {
+    final unread = context.watch<NotificationsProvider>().unreadCount;
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -75,26 +113,30 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   // Campana de notificaciones
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
-                        Positioned(
-                          right: -2,
-                          top: -2,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(color: Color(0xFFE8734A), shape: BoxShape.circle),
-                          ),
-                        ),
-                      ],
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/admin/notifications'),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
+                          if (unread > 0)
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(color: Color(0xFFE8734A), shape: BoxShape.circle),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -131,11 +173,20 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   /// Tarjeta "Ventas hoy" con monto, porcentaje, meta y barra de progreso
-  Widget _buildVentasHoyCard() {
-    const double ventas = 1240.00;
-    const double meta = 2000.00;
-    const double porcentaje = ventas / meta;
-    const int porcentajeInt = 70;
+  Widget _buildVentasHoyCard(ReportsProvider rp) {
+    final daily = rp.dailyReport;
+    final ventas = daily?.totalVentas ?? 0;
+    final monthly = rp.monthlyReport;
+    final metaMensual = monthly != null && monthly.totalVentas > 0
+        ? monthly.totalVentas * 1.2 // meta = 120% de ventas mes actual
+        : 5000.0;
+    // Meta diaria proporcional: metaMensual / días del mes
+    final diasMes = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
+    final metaDiaria = metaMensual / diasMes;
+    final porcentaje = metaDiaria > 0 ? (ventas / metaDiaria).clamp(0.0, 1.0) : 0.0;
+    final porcentajeInt = (porcentaje * 100).round();
+    final growth = daily?.growthPercent ?? 0;
+    final growthPositive = growth >= 0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -188,26 +239,34 @@ class AdminDashboardScreen extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Text(
-                '\$1,240.00',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Text(
+                _formatCurrency(ventas),
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const Spacer(),
-              // Tendencia +12%
+              // Tendencia
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.1),
+                  color: (growthPositive ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.trending_up, color: AppColors.success, size: 14),
-                    SizedBox(width: 4),
+                    Icon(
+                      growthPositive ? Icons.trending_up : Icons.trending_down,
+                      color: growthPositive ? AppColors.success : AppColors.error,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
                     Text(
-                      '+12%',
-                      style: TextStyle(color: AppColors.success, fontSize: 12, fontWeight: FontWeight.w700),
+                      '${growthPositive ? '+' : ''}${growth.toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        color: growthPositive ? AppColors.success : AppColors.error,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -220,7 +279,7 @@ class AdminDashboardScreen extends StatelessWidget {
             children: [
               const Spacer(),
               Text(
-                'META: \$${meta.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+                'META: ${_formatCurrency(metaDiaria)}',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
             ],
@@ -231,7 +290,11 @@ class AdminDashboardScreen extends StatelessWidget {
               const Spacer(),
               Text(
                 '$porcentajeInt%',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: porcentajeInt >= 100 ? AppColors.success : const Color(0xFFE8734A),
+                ),
               ),
             ],
           ),
@@ -252,7 +315,10 @@ class AdminDashboardScreen extends StatelessWidget {
   }
 
   /// Tarjeta "Tendencia Semanal" con monto y gráfico de barras
-  Widget _buildTendenciaSemanalCard() {
+  Widget _buildTendenciaSemanalCard(ReportsProvider rp) {
+    final trend = rp.weeklyTrend;
+    final totalSemanal = trend.values.fold<double>(0, (a, b) => a + b);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -285,46 +351,44 @@ class AdminDashboardScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  '\$8,450.20',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                Text(
+                  _formatCurrency(totalSemanal),
+                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                 ),
               ],
             ),
           ),
           // Gráfico de barras mini
-          _buildMiniBarChart(),
+          _buildMiniBarChart(trend),
         ],
       ),
     );
   }
 
-  /// Mini gráfico de barras decorativo
-  Widget _buildMiniBarChart() {
-    final barHeights = [28.0, 40.0, 24.0, 48.0, 36.0, 44.0, 32.0];
-    final barColors = [
-      const Color(0xFFE8734A),
-      AppColors.success,
-      const Color(0xFFE8734A),
-      AppColors.success,
-      const Color(0xFFE8734A),
-      AppColors.success,
-      const Color(0xFFE8734A),
-    ];
+  /// Mini gráfico de barras basado en datos reales de tendencia semanal
+  Widget _buildMiniBarChart(Map<String, double> trend) {
+    final values = trend.values.toList();
+    if (values.isEmpty) {
+      return const SizedBox(width: 80, height: 56);
+    }
+    final maxVal = values.reduce(math.max);
+    const maxH = 48.0;
 
     return SizedBox(
       height: 56,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(barHeights.length, (i) {
+        children: List.generate(values.length, (i) {
+          final h = maxVal > 0 ? (values[i] / maxVal) * maxH : 4.0;
+          final color = i % 2 == 0 ? const Color(0xFFE8734A) : AppColors.success;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Container(
               width: 10,
-              height: barHeights[i],
+              height: math.max(h, 4),
               decoration: BoxDecoration(
-                color: barColors[i].withValues(alpha: 0.7),
+                color: color.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -334,8 +398,37 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  /// Tarjeta "Estado Actual — Nivel Pro"
-  Widget _buildEstadoActualCard() {
+  /// Tarjeta "Estado Actual" — nivel basado en ventas mensuales reales
+  Widget _buildEstadoActualCard(ReportsProvider rp) {
+    final ventasMes = rp.monthlyReport?.totalVentas ?? 0;
+    // Niveles por rangos de ventas mensuales
+    String nivel;
+    String proximoNivel;
+    double metaProxima;
+    Color nivelColor;
+    if (ventasMes >= 50000) {
+      nivel = 'Nivel Diamante';
+      proximoNivel = '';
+      metaProxima = 0;
+      nivelColor = const Color(0xFF5B8DBE);
+    } else if (ventasMes >= 20000) {
+      nivel = 'Nivel Pro';
+      proximoNivel = 'Diamante';
+      metaProxima = 50000;
+      nivelColor = const Color(0xFF5B8DBE);
+    } else if (ventasMes >= 5000) {
+      nivel = 'Nivel Avanzado';
+      proximoNivel = 'Pro';
+      metaProxima = 20000;
+      nivelColor = AppColors.success;
+    } else {
+      nivel = 'Nivel Básico';
+      proximoNivel = 'Avanzado';
+      metaProxima = 5000;
+      nivelColor = const Color(0xFFE8734A);
+    }
+    final faltante = metaProxima > ventasMes ? metaProxima - ventasMes : 0.0;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
@@ -349,48 +442,61 @@ class AdminDashboardScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF5B8DBE).withValues(alpha: 0.12),
+              color: nivelColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.star_rounded, color: Color(0xFF5B8DBE), size: 24),
+            child: Icon(Icons.star_rounded, color: nivelColor, size: 24),
           ),
           const SizedBox(width: 14),
-          // Textos: Estado Actual / Nivel Pro
-          const Expanded(
+          // Textos: Estado Actual / Nivel
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Estado Actual',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'Nivel Pro',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  nivel,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                 ),
               ],
             ),
           ),
-          // Próximo bono
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Text(
-                'PRÓXIMO BONO',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '\$500 faltantes',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.success.withValues(alpha: 0.9),
+          // Próximo bono o logro máximo
+          if (proximoNivel.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'PRÓXIMO: $proximoNivel'.toUpperCase(),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_formatCurrency(faltante)} faltantes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: nivelColor.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            )
+          else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: nivelColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
-          ),
+              child: Text(
+                '¡MÁXIMO!',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: nivelColor),
+              ),
+            ),
         ],
       ),
     );

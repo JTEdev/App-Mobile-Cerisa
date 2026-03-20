@@ -32,6 +32,9 @@ public class UserService {
     /** Repositorio para acceder a los datos de usuarios en la base de datos. */
     private final UserRepository userRepository;
 
+    /** Servicio de notificaciones. */
+    private final NotificationService notificationService;
+
     /** Encoder para cifrar contraseñas. */
     private final PasswordEncoder passwordEncoder;
 
@@ -107,6 +110,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(rawPassword));
 
         User saved = userRepository.save(user);
+        notificationService.onNewClient(saved);
         return toResponse(saved);
     }
 

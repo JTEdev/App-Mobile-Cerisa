@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cerisa_app/core/services/api_service.dart';
+import 'package:cerisa_app/core/constants/api_constants.dart';
 
 /// Modelo de datos que representa un producto del catálogo.
 ///
@@ -41,6 +42,10 @@ class ProductModel {
 
   /// Crea una instancia de [ProductModel] a partir de un mapa JSON.
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    String? rawUrl = json['imagenUrl'] as String?;
+    if (rawUrl != null && rawUrl.isNotEmpty && !rawUrl.startsWith('http')) {
+      rawUrl = 'http://10.0.2.2:8081$rawUrl';
+    }
     return ProductModel(
       id: json['id'] as int,
       nombre: json['nombre'] as String,
@@ -48,7 +53,7 @@ class ProductModel {
       precio: (json['precio'] as num).toDouble(),
       stock: json['stock'] as int,
       categoria: json['categoria'] as String?,
-      imagenUrl: json['imagenUrl'] as String?,
+      imagenUrl: rawUrl,
     );
   }
 }

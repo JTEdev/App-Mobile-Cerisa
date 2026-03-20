@@ -89,6 +89,9 @@ public class SecurityConfig {
                         // --- Users: solo administradores ---
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
 
+                        // --- Notifications: solo administradores ---
+                        .requestMatchers("/api/notifications/**").hasRole("ADMIN")
+
                         // --- Todo lo demás requiere autenticación ---
                         .anyRequest().authenticated())
                 // Agregar el filtro JWT antes del filtro estándar de autenticación

@@ -22,6 +22,8 @@ import 'package:cerisa_app/features/search/presentation/screens/search_results_s
 import 'package:cerisa_app/features/favorites/presentation/screens/favorites_screen.dart';
 import 'package:cerisa_app/features/orders/presentation/screens/order_success_screen.dart';
 import 'package:cerisa_app/features/orders/presentation/screens/order_tracking_screen.dart';
+import 'package:cerisa_app/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:cerisa_app/features/help/presentation/screens/help_center_screen.dart';
 
 /// Sistema de rutas con nombre de la aplicación Cerisa.
 ///
@@ -102,6 +104,12 @@ class AppRoutes {
   /// Ruta de la pantalla de edición de producto.
   static const String editProduct = '/admin/products/edit';
 
+  /// Ruta de la pantalla de notificaciones del vendedor.
+  static const String notifications = '/admin/notifications';
+
+  /// Ruta de la pantalla de centro de ayuda.
+  static const String helpCenter = '/help-center';
+
   /// Generador de rutas utilizado por [MaterialApp.onGenerateRoute].
   ///
   /// Recibe [RouteSettings] con el nombre de la ruta y argumentos opcionales,
@@ -110,58 +118,63 @@ class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case splash:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const LoginScreen());
       case login:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const LoginScreen());
       case register:
-        return MaterialPageRoute(builder: (_) => const RegisterScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const RegisterScreen());
       case home:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => HomeScreen(key: HomeScreen.globalKey));
       case catalog:
-        return MaterialPageRoute(builder: (_) => const CatalogScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const CatalogScreen());
       case productDetail:
         // Se espera recibir el ID del producto como argumento de tipo int
         final productId = settings.arguments as int;
-        return MaterialPageRoute(builder: (_) => ProductDetailScreen(productId: productId));
+        return MaterialPageRoute(settings: settings, builder: (_) => ProductDetailScreen(productId: productId));
       case cart:
-        return MaterialPageRoute(builder: (_) => const CartScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const CartScreen());
       case checkout:
-        return MaterialPageRoute(builder: (_) => const CheckoutScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const CheckoutScreen());
       case orders:
-        return MaterialPageRoute(builder: (_) => const MyOrdersScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const MyOrdersScreen());
       case search:
-        return MaterialPageRoute(builder: (_) => const SearchScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const SearchScreen());
       case searchResults:
         final searchArgs = settings.arguments as SearchResultsArgs;
-        return MaterialPageRoute(builder: (_) => SearchResultsScreen(args: searchArgs));
+        return MaterialPageRoute(settings: settings, builder: (_) => SearchResultsScreen(args: searchArgs));
       case favorites:
-        return MaterialPageRoute(builder: (_) => const FavoritesScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const FavoritesScreen());
       case orderTracking:
         final trackOrder = settings.arguments as OrderModel;
-        return MaterialPageRoute(builder: (_) => OrderTrackingScreen(order: trackOrder));
+        return MaterialPageRoute(settings: settings, builder: (_) => OrderTrackingScreen(order: trackOrder));
       case orderSuccess:
         final successArgs = settings.arguments as OrderSuccessArgs;
-        return MaterialPageRoute(builder: (_) => OrderSuccessScreen(args: successArgs));
+        return MaterialPageRoute(settings: settings, builder: (_) => OrderSuccessScreen(args: successArgs));
       case profile:
-        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const ProfileScreen());
       case adminProducts:
-        return MaterialPageRoute(builder: (_) => const AdminProductsScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const AdminProductsScreen());
       case adminStock:
-        return MaterialPageRoute(builder: (_) => const AdminStockScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const AdminStockScreen());
       case adminOrders:
-        return MaterialPageRoute(builder: (_) => const AdminOrdersScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const AdminOrdersScreen());
       case adminReports:
-        return MaterialPageRoute(builder: (_) => const AdminReportsScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const AdminReportsScreen());
       case adminUsers:
-        return MaterialPageRoute(builder: (_) => const AdminUsersScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const AdminUsersScreen());
       case registerSale:
-        return MaterialPageRoute(builder: (_) => const RegisterSaleScreen());
+        return MaterialPageRoute(settings: settings, builder: (_) => const RegisterSaleScreen());
       case editProduct:
         final editProductArg = settings.arguments as ProductModel?;
-        return MaterialPageRoute(builder: (_) => EditProductScreen(product: editProductArg));
+        return MaterialPageRoute(settings: settings, builder: (_) => EditProductScreen(product: editProductArg));
+      case notifications:
+        return MaterialPageRoute(settings: settings, builder: (_) => const NotificationsScreen());
+      case helpCenter:
+        return MaterialPageRoute(settings: settings, builder: (_) => const HelpCenterScreen());
       default:
         // Ruta no registrada: mostrar pantalla de error
         return MaterialPageRoute(
+          settings: settings,
           builder: (_) => Scaffold(body: Center(child: Text('Ruta no encontrada: ${settings.name}'))),
         );
     }

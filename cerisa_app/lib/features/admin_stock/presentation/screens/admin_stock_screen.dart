@@ -4,6 +4,7 @@ import 'package:cerisa_app/core/theme/app_theme.dart';
 import 'package:cerisa_app/core/widgets/common_widgets.dart';
 import 'package:cerisa_app/features/admin_products/presentation/providers/admin_products_provider.dart';
 import 'package:cerisa_app/features/catalog/presentation/providers/catalog_provider.dart';
+import 'package:cerisa_app/core/widgets/admin_bottom_nav.dart';
 
 /// Pantalla de gestión de inventario / stock para el vendedor.
 ///
@@ -130,6 +131,7 @@ class _AdminStockScreenState extends State<AdminStockScreen> {
         ),
       ),
       floatingActionButton: _buildFab(),
+      bottomNavigationBar: const AdminBottomNav(),
     );
   }
 

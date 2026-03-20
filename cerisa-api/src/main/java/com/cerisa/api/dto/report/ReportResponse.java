@@ -39,6 +39,9 @@ public class ReportResponse {
     /** Monto total de ventas en pesos (excluye pedidos cancelados). */
     private BigDecimal totalVentas;
 
+    /** Ventas del período anterior para cálculo de crecimiento. */
+    private BigDecimal ventasAnterior;
+
     /** Lista de los productos más vendidos en el período (top 10). */
     private List<TopProductResponse> topProductos;
 }

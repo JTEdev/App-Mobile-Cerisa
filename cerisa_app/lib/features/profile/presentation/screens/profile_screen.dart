@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cerisa_app/core/theme/app_theme.dart';
 import 'package:cerisa_app/core/routes/app_routes.dart';
 import 'package:cerisa_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:cerisa_app/features/home/presentation/screens/home_screen.dart';
 
 /// Pantalla de perfil del usuario estilo e-commerce.
 ///
@@ -182,35 +183,15 @@ class ProfileScreen extends StatelessWidget {
           ),
           _buildDivider(),
           _buildOptionItem(
-            icon: Icons.location_on_rounded,
-            title: 'Direcciones',
-            onTap: () {
-              // TODO: pantalla de direcciones
-            },
-          ),
-          _buildDivider(),
-          _buildOptionItem(
-            icon: Icons.credit_card_rounded,
-            title: 'Métodos de Pago',
-            onTap: () {
-              // TODO: pantalla de métodos de pago
-            },
-          ),
-          _buildDivider(),
-          _buildOptionItem(
             icon: Icons.notifications_rounded,
             title: 'Notificaciones',
-            onTap: () {
-              // TODO: pantalla de notificaciones
-            },
+            onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
           ),
           _buildDivider(),
           _buildOptionItem(
             icon: Icons.help_outline_rounded,
             title: 'Centro de Ayuda',
-            onTap: () {
-              // TODO: pantalla de ayuda
-            },
+            onTap: () => Navigator.pushNamed(context, AppRoutes.helpCenter),
             isLast: true,
           ),
         ],
@@ -255,7 +236,7 @@ class ProfileScreen extends StatelessWidget {
               _buildOptionItem(
                 icon: Icons.list_alt_rounded,
                 title: 'Gestión Pedidos',
-                onTap: () => Navigator.pushNamed(context, AppRoutes.adminOrders),
+                onTap: () => HomeScreen.switchToTab(2),
               ),
               _buildDivider(),
               _buildOptionItem(
@@ -267,7 +248,7 @@ class ProfileScreen extends StatelessWidget {
               _buildOptionItem(
                 icon: Icons.people_rounded,
                 title: 'Usuarios',
-                onTap: () => Navigator.pushNamed(context, AppRoutes.adminUsers),
+                onTap: () => HomeScreen.switchToTab(3),
                 isLast: true,
               ),
             ],
