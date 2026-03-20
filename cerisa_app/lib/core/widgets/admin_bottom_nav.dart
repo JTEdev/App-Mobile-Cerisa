@@ -37,9 +37,7 @@ class AdminBottomNav extends StatelessWidget {
   Widget _buildItem(BuildContext context, int tabIndex, IconData icon, String label) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).popUntil(
-          (route) => route.settings.name == '/home' || route.isFirst,
-        );
+        Navigator.of(context).popUntil((route) => route.settings.name == '/home' || route.isFirst);
         HomeScreen.switchToTab(tabIndex);
       },
       behavior: HitTestBehavior.opaque,
@@ -52,11 +50,7 @@ class AdminBottomNav extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
             ),
           ],
         ),

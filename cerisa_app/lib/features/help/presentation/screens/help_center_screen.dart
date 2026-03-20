@@ -120,16 +120,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                   // FAQ section
                   const Text(
                     'Preguntas Frecuentes',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 16),
-                  ..._faqs.asMap().entries.map(
-                    (entry) => _buildFaqItem(entry.key, entry.value),
-                  ),
+                  ..._faqs.asMap().entries.map((entry) => _buildFaqItem(entry.key, entry.value)),
                 ],
               ),
             ),
@@ -152,11 +146,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
             child: Text(
               'Centro de Ayuda',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
           ),
           const SizedBox(width: 48), // balance the back button
@@ -171,22 +161,13 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Buscar ayuda, pedidos...',
-          hintStyle: TextStyle(
-            color: AppColors.textSecondary.withValues(alpha: 0.6),
-            fontSize: 15,
-          ),
+          hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.6), fontSize: 15),
           prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 22),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -228,11 +209,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 Expanded(
                   child: Text(
                     category.title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   ),
                 ),
                 const Icon(Icons.chevron_right_rounded, color: AppColors.divider, size: 24),
@@ -290,14 +267,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
           firstChild: const SizedBox.shrink(),
           secondChild: Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              faq.answer,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
+            child: Text(faq.answer, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5)),
           ),
           crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 200),
@@ -313,11 +283,7 @@ class _HelpCategory {
   final String title;
   final String description;
 
-  const _HelpCategory({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
+  const _HelpCategory({required this.icon, required this.title, required this.description});
 }
 
 class _FaqItem {

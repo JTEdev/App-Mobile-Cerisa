@@ -101,7 +101,7 @@ public class ReportService {
      * @return el reporte completo con todas las métricas
      */
     private ReportResponse buildReport(String periodo, LocalDateTime desde, LocalDateTime hasta,
-                                         LocalDateTime desdeAnt, LocalDateTime hastaAnt) {
+            LocalDateTime desdeAnt, LocalDateTime hastaAnt) {
         Long totalPedidos = orderRepository.countByFechaRange(desde, hasta);
         BigDecimal totalVentas = orderRepository.sumTotalByFechaRange(desde, hasta);
         BigDecimal ventasAnterior = orderRepository.sumTotalByFechaRange(desdeAnt, hastaAnt);
@@ -139,7 +139,7 @@ public class ReportService {
         LocalDateTime desde = today.minusDays(6).atStartOfDay();
         LocalDateTime hasta = today.atTime(LocalTime.MAX);
         List<Object[]> rows = orderRepository.sumTotalByDay(desde, hasta);
-        String[] dayLabels = {"L", "M", "X", "J", "V", "S", "D"};
+        String[] dayLabels = { "L", "M", "X", "J", "V", "S", "D" };
         Map<String, Double> trend = new LinkedHashMap<>();
         for (int i = 6; i >= 0; i--) {
             LocalDate day = today.minusDays(i);

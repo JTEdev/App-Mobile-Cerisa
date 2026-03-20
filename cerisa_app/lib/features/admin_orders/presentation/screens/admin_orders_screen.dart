@@ -117,43 +117,24 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 20,
-        left: 20,
-        right: 20,
-      ),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 16, bottom: 20, left: 20, right: 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.primaryDark, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Cerisa Artesanal',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 0.5),
           ),
           SizedBox(height: 4),
-          Text(
-            'Gestión de Pedidos',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
+          Text('Gestión de Pedidos', style: TextStyle(color: Colors.white70, fontSize: 14)),
         ],
       ),
     );
@@ -185,12 +166,15 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isActive ? color : Colors.white,
-                        border: Border.all(
-                          color: isActive ? color : AppColors.divider,
-                          width: isActive ? 2.5 : 1.5,
-                        ),
+                        border: Border.all(color: isActive ? color : AppColors.divider, width: isActive ? 2.5 : 1.5),
                         boxShadow: isActive
-                            ? [BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 3))]
+                            ? [
+                                BoxShadow(
+                                  color: color.withValues(alpha: 0.35),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
                             : [],
                       ),
                       child: Icon(
@@ -287,8 +271,14 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Nro', style: TextStyle(fontSize: 10, color: statusColor, fontWeight: FontWeight.w500)),
-                        Text('${order.id}', style: TextStyle(fontSize: 16, color: statusColor, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Nro',
+                          style: TextStyle(fontSize: 10, color: statusColor, fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          '${order.id}',
+                          style: TextStyle(fontSize: 16, color: statusColor, fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ),
@@ -299,7 +289,11 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       children: [
                         Text(
                           order.clienteNombre,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textPrimary),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(order.clienteEmail, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
@@ -320,7 +314,11 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                             const Spacer(),
                             Text(
                               'S/ ${order.total.toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ],
                         ),
@@ -360,21 +358,38 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
             children: [
               const Icon(Icons.receipt_long_rounded, size: 18, color: AppColors.primary),
               const SizedBox(width: 6),
-              const Text('Detalle del Pedido', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary)),
+              const Text(
+                'Detalle del Pedido',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          ...order.items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle)),
-                const SizedBox(width: 8),
-                Expanded(child: Text('${item.productoNombre} x${item.cantidad}', style: const TextStyle(fontSize: 13, color: AppColors.textPrimary))),
-                Text('S/ ${item.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-              ],
+          ...order.items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${item.productoNombre} x${item.cantidad}',
+                      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                    ),
+                  ),
+                  Text(
+                    'S/ ${item.subtotal.toStringAsFixed(2)}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
           if (order.direccionEntrega != null && order.direccionEntrega!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -390,9 +405,15 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Dirección de entrega', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        const Text(
+                          'Dirección de entrega',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
                         const SizedBox(height: 2),
-                        Text(order.direccionEntrega!, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                        Text(
+                          order.direccionEntrega!,
+                          style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                        ),
                       ],
                     ),
                   ),
@@ -411,7 +432,9 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 children: [
                   const Icon(Icons.note_alt_rounded, size: 18, color: AppColors.accent),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(order.notas!, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary))),
+                  Expanded(
+                    child: Text(order.notas!, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                  ),
                 ],
               ),
             ),
@@ -421,7 +444,10 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
             children: [
               const Icon(Icons.swap_horiz_rounded, size: 18, color: AppColors.primary),
               const SizedBox(width: 6),
-              const Text('Marcar Nuevo Estado', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary)),
+              const Text(
+                'Marcar Nuevo Estado',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -433,14 +459,19 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               final isCancel = status == 'CANCELADO';
               final color = _statusColor(status);
               return GestureDetector(
-                onTap: isActive ? null : () async {
-                  final ok = await provider.updateStatus(order.id, status);
-                  if (!ok && mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(provider.error ?? 'Error al actualizar'), backgroundColor: Colors.red),
-                    );
-                  }
-                },
+                onTap: isActive
+                    ? null
+                    : () async {
+                        final ok = await provider.updateStatus(order.id, status);
+                        if (!ok && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(provider.error ?? 'Error al actualizar'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -455,10 +486,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isActive) ...[
-                        Icon(Icons.check_circle, size: 16, color: color),
-                        const SizedBox(width: 4),
-                      ],
+                      if (isActive) ...[Icon(Icons.check_circle, size: 16, color: color), const SizedBox(width: 4)],
                       Text(
                         status == 'CANCELADO' ? 'ANULAR' : _statusLabel(status).toUpperCase(),
                         style: TextStyle(

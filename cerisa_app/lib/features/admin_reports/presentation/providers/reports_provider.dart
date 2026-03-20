@@ -75,10 +75,14 @@ class ReportsProvider extends ChangeNotifier {
   /// Devuelve el reporte para el per\u00edodo solicitado (0=d\u00eda, 1=mes, 2=a\u00f1o).
   ReportModel? reportForPeriod(int periodIndex) {
     switch (periodIndex) {
-      case 0: return _dailyReport;
-      case 1: return _monthlyReport;
-      case 2: return _yearlyReport;
-      default: return _monthlyReport;
+      case 0:
+        return _dailyReport;
+      case 1:
+        return _monthlyReport;
+      case 2:
+        return _yearlyReport;
+      default:
+        return _monthlyReport;
     }
   }
 

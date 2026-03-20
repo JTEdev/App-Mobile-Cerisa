@@ -78,7 +78,9 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
             );
           },
         ),
-      ),      bottomNavigationBar: const AdminBottomNav(),    );
+      ),
+      bottomNavigationBar: const AdminBottomNav(),
+    );
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -452,14 +454,23 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
           children: [
             const Text(
               'TENDENCIA SEMANAL',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 2,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(18)),
-              child: const Text('No hay ventas en los \u00faltimos 7 d\u00edas', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'No hay ventas en los \u00faltimos 7 d\u00edas',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
           ],
         ),
@@ -475,7 +486,12 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         children: [
           const Text(
             'TENDENCIA SEMANAL',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2,
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 14),
           Container(

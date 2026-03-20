@@ -178,7 +178,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final ventas = daily?.totalVentas ?? 0;
     final monthly = rp.monthlyReport;
     final metaMensual = monthly != null && monthly.totalVentas > 0
-        ? monthly.totalVentas * 1.2 // meta = 120% de ventas mes actual
+        ? monthly.totalVentas *
+              1.2 // meta = 120% de ventas mes actual
         : 5000.0;
     // Meta diaria proporcional: metaMensual / días del mes
     final diasMes = DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day;
@@ -387,10 +388,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Container(
               width: 10,
               height: math.max(h, 4),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(4)),
             ),
           );
         }),
@@ -477,11 +475,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 2),
                 Text(
                   '${_formatCurrency(faltante)} faltantes',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: nivelColor.withValues(alpha: 0.9),
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: nivelColor.withValues(alpha: 0.9)),
                 ),
               ],
             )

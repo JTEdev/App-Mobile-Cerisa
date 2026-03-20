@@ -38,6 +38,7 @@ public class Notification {
     @PrePersist
     protected void onCreate() {
         creadoEn = LocalDateTime.now();
-        if (leida == null) leida = false;
+        if (leida == null)
+            leida = false;
     }
 }

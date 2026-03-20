@@ -124,13 +124,19 @@ class AppRoutes {
       case register:
         return MaterialPageRoute(settings: settings, builder: (_) => const RegisterScreen());
       case home:
-        return MaterialPageRoute(settings: settings, builder: (_) => HomeScreen(key: HomeScreen.globalKey));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => HomeScreen(key: HomeScreen.globalKey),
+        );
       case catalog:
         return MaterialPageRoute(settings: settings, builder: (_) => const CatalogScreen());
       case productDetail:
         // Se espera recibir el ID del producto como argumento de tipo int
         final productId = settings.arguments as int;
-        return MaterialPageRoute(settings: settings, builder: (_) => ProductDetailScreen(productId: productId));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ProductDetailScreen(productId: productId),
+        );
       case cart:
         return MaterialPageRoute(settings: settings, builder: (_) => const CartScreen());
       case checkout:
@@ -141,15 +147,24 @@ class AppRoutes {
         return MaterialPageRoute(settings: settings, builder: (_) => const SearchScreen());
       case searchResults:
         final searchArgs = settings.arguments as SearchResultsArgs;
-        return MaterialPageRoute(settings: settings, builder: (_) => SearchResultsScreen(args: searchArgs));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => SearchResultsScreen(args: searchArgs),
+        );
       case favorites:
         return MaterialPageRoute(settings: settings, builder: (_) => const FavoritesScreen());
       case orderTracking:
         final trackOrder = settings.arguments as OrderModel;
-        return MaterialPageRoute(settings: settings, builder: (_) => OrderTrackingScreen(order: trackOrder));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => OrderTrackingScreen(order: trackOrder),
+        );
       case orderSuccess:
         final successArgs = settings.arguments as OrderSuccessArgs;
-        return MaterialPageRoute(settings: settings, builder: (_) => OrderSuccessScreen(args: successArgs));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => OrderSuccessScreen(args: successArgs),
+        );
       case profile:
         return MaterialPageRoute(settings: settings, builder: (_) => const ProfileScreen());
       case adminProducts:
@@ -166,7 +181,10 @@ class AppRoutes {
         return MaterialPageRoute(settings: settings, builder: (_) => const RegisterSaleScreen());
       case editProduct:
         final editProductArg = settings.arguments as ProductModel?;
-        return MaterialPageRoute(settings: settings, builder: (_) => EditProductScreen(product: editProductArg));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => EditProductScreen(product: editProductArg),
+        );
       case notifications:
         return MaterialPageRoute(settings: settings, builder: (_) => const NotificationsScreen());
       case helpCenter:

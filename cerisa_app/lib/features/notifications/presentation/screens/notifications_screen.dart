@@ -43,46 +43,42 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   padding: EdgeInsets.fromLTRB(22, 20, 22, 12),
                   child: Text(
                     'Actividad Reciente',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                   ),
                 ),
                 Expanded(
                   child: provider.isLoading
                       ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       : provider.error != null
-                          ? Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(provider.error!, style: const TextStyle(color: AppColors.textSecondary)),
-                                  const SizedBox(height: 12),
-                                  ElevatedButton(
-                                    onPressed: () => provider.loadNotifications(force: true),
-                                    child: const Text('Reintentar'),
-                                  ),
-                                ],
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(provider.error!, style: const TextStyle(color: AppColors.textSecondary)),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: () => provider.loadNotifications(force: true),
+                                child: const Text('Reintentar'),
                               ),
-                            )
-                          : items.isEmpty
-                              ? const Center(
-                                  child: Text(
-                                    'Sin notificaciones',
-                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
-                                  ),
-                                )
-                              : RefreshIndicator(
-                                  onRefresh: () => provider.loadNotifications(force: true),
-                                  color: AppColors.primary,
-                                  child: ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
-                                    itemCount: items.length,
-                                    itemBuilder: (_, i) => _buildNotifCard(items[i], provider),
-                                  ),
-                                ),
+                            ],
+                          ),
+                        )
+                      : items.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Sin notificaciones',
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => provider.loadNotifications(force: true),
+                          color: AppColors.primary,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
+                            itemCount: items.length,
+                            itemBuilder: (_, i) => _buildNotifCard(items[i], provider),
+                          ),
+                        ),
                 ),
               ],
             );
@@ -104,11 +100,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const SizedBox(width: 14),
           const Text(
             'Notificaciones',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
           ),
           const Spacer(),
           GestureDetector(
@@ -126,9 +118,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: unreadCount > 0
-                      ? const Color(0xFFE8734A)
-                      : AppColors.textSecondary,
+                  color: unreadCount > 0 ? const Color(0xFFE8734A) : AppColors.textSecondary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -147,16 +137,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border(
-          left: BorderSide(color: config.accentColor, width: 3.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border(left: BorderSide(color: config.accentColor, width: 3.5)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
@@ -169,10 +151,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: BoxDecoration(
-                    color: config.iconBg,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  decoration: BoxDecoration(color: config.iconBg, borderRadius: BorderRadius.circular(14)),
                   child: Icon(config.icon, color: config.accentColor, size: 24),
                 ),
                 const SizedBox(width: 12),
@@ -182,11 +161,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     children: [
                       Text(
                         item.titulo,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -217,10 +192,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       Container(
                         width: 10,
                         height: 10,
-                        decoration: BoxDecoration(
-                          color: config.accentColor,
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(color: config.accentColor, shape: BoxShape.circle),
                       ),
                     ],
                   ],
@@ -242,17 +214,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         backgroundColor: config.accentColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         config.primaryLabel,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.5),
                       ),
                     ),
                   ),
@@ -268,20 +234,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textSecondary,
-                        side: BorderSide(
-                          color: AppColors.divider.withValues(alpha: 0.6),
-                          width: 1.2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        side: BorderSide(color: AppColors.divider.withValues(alpha: 0.6), width: 1.2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(
                         config.secondaryLabel,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -366,9 +324,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void _goToHomeTab(int tabIndex) {
-    Navigator.of(context).popUntil(
-      (route) => route.settings.name == '/home' || route.isFirst,
-    );
+    Navigator.of(context).popUntil((route) => route.settings.name == '/home' || route.isFirst);
     HomeScreen.switchToTab(tabIndex);
   }
 
@@ -396,21 +352,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           final ordersProvider = context.read<OrdersProvider>();
           final ok = await ordersProvider.updateStatus(item.referenciaId!, 'EN_PREPARACION');
           if (mounted) {
-            _showSnack(ok
-                ? 'Pedido #${item.referenciaId} en preparaci\u00f3n'
-                : 'Error al actualizar pedido');
+            _showSnack(ok ? 'Pedido #${item.referenciaId} en preparaci\u00f3n' : 'Error al actualizar pedido');
           }
         }
         break;
       case 'STOCK_CRITICO':
         if (item.referenciaId != null) {
           final productsProvider = context.read<AdminProductsProvider>();
-          final ok = await productsProvider.updateProduct(
-              item.referenciaId!, {'activo': false});
+          final ok = await productsProvider.updateProduct(item.referenciaId!, {'activo': false});
           if (mounted) {
-            _showSnack(ok
-                ? 'Producto ocultado del cat\u00e1logo'
-                : 'Error al ocultar producto');
+            _showSnack(ok ? 'Producto ocultado del cat\u00e1logo' : 'Error al ocultar producto');
           }
         }
         break;

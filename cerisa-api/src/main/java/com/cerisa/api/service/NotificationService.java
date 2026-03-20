@@ -89,7 +89,8 @@ public class NotificationService {
         List<Product> products = productRepository.findAll();
         for (Product p : products) {
             if (Boolean.TRUE.equals(p.getActivo()) && p.getStock() != null && p.getStock() <= STOCK_CRITICO) {
-                // Evitar duplicar si ya existe una notif reciente (últimas 24h) para este producto
+                // Evitar duplicar si ya existe una notif reciente (últimas 24h) para este
+                // producto
                 boolean exists = notificationRepository.findAllByOrderByCreadoEnDesc().stream()
                         .anyMatch(n -> "STOCK_CRITICO".equals(n.getTipo())
                                 && p.getId().equals(n.getReferenciaId())

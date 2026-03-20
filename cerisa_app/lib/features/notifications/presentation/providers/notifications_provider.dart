@@ -60,9 +60,7 @@ class NotificationsProvider extends ChangeNotifier {
 
     try {
       final list = await _api.getList('/notifications', auth: true);
-      _notifications = list
-          .map((j) => NotificationModel.fromJson(j as Map<String, dynamic>))
-          .toList();
+      _notifications = list.map((j) => NotificationModel.fromJson(j as Map<String, dynamic>)).toList();
       _unreadCount = _notifications.where((n) => !n.leida).length;
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');

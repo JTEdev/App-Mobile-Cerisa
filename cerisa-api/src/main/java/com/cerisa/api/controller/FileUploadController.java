@@ -82,7 +82,8 @@ public class FileUploadController {
           .body(Map.of("mensaje", "Formato no permitido. Use: jpg, jpeg, png, webp, gif"));
     }
 
-    // Validar content-type (aceptar image/* o application/octet-stream si la extensión ya fue validada)
+    // Validar content-type (aceptar image/* o application/octet-stream si la
+    // extensión ya fue validada)
     String contentType = file.getContentType();
     if (contentType != null && !contentType.startsWith("image/") && !contentType.equals("application/octet-stream")) {
       return ResponseEntity.badRequest()
